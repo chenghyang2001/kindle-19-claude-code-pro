@@ -5,7 +5,8 @@
  * 執行方式：npx tsx lib/db/seed.ts
  * 前置條件：DATABASE_URL 環境變數已設定，資料表已透過 db:push 或 db:migrate 建立
  */
-import 'dotenv/config'
+import * as dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 import bcrypt from 'bcryptjs'
 import { db } from './index'
 import { users, projects, tasks, project_members } from './schema'

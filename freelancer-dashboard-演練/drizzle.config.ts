@@ -3,6 +3,8 @@
  * 用於 db:generate / db:migrate / db:push 指令
  * dialect 設為 postgresql（對應 Neon Serverless PostgreSQL）
  */
+import * as dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 import type { Config } from 'drizzle-kit'
 
 export default {
