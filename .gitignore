@@ -2,6 +2,15 @@
 techblog-demo/.next/
 techblog-demo/node_modules/
 techblog-demo/.env.local
+freelancer-dashboard/node_modules/
+freelancer-dashboard/.next/
+freelancer-dashboard/.env.local
+freelancer-dashboard-演練/node_modules/
+freelancer-dashboard-演練/.next/
+freelancer-dashboard-演練/.env.local
+
+# Google OAuth client secrets
+client_secret_*.json
 
 # Python
 __pycache__/
