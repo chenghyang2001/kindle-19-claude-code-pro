@@ -2,3 +2,6 @@
 .cache/
 __pycache__/
 *.pyc
+token.json
+credentials.json
+*.stackdump

@@ -15,6 +15,8 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+
+CLAUDE_CMD = "claude.cmd" if sys.platform == "win32" else "claude"
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
@@ -67,6 +69,17 @@ def _fetch_emails_today(dry_run: bool) -> list[dict]:
             },
         ]
 
+    # 優先使用預取快取（Gmail MCP 在 subprocess 模式下無法自動授權時的降級方案）
+    prefetch_path = Path(__file__).parent / ".cache" / "today_emails.json"
+    if prefetch_path.exists():
+        try:
+            with open(prefetch_path, encoding="utf-8") as f:
+                emails = json.load(f)
+            print(f"[抓信] 使用預取快取：{prefetch_path.name}（{len(emails)} 封）")
+            return emails
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"[抓信] 預取快取讀取失敗：{exc}，改用即時抓取", file=sys.stderr)
+
     prompt = (
         f"Use Gmail MCP to search for emails received after {date_str} Taiwan time. "
         "Return ONLY a JSON array. Each item must have: 'id' (message id), 'subject', "
@@ -76,9 +89,11 @@ def _fetch_emails_today(dry_run: bool) -> list[dict]:
 
     try:
         result = subprocess.run(
-            ["claude", "-p", prompt],
+            [CLAUDE_CMD, "-p", "--dangerouslySkipPermissions"],
+            input=prompt,
             capture_output=True,
             text=True,
+            encoding="utf-8",
             timeout=60,
         )
     except subprocess.TimeoutExpired:
@@ -192,7 +207,7 @@ def main() -> None:
     print("=" * 60 + "\n")
 
     if not args.dry_run:
-        result = send_telegram(token, chat_id, message)
+        result = send_telegram(message, token, chat_id)
         print(f"[Telegram] 發送結果：{result}")
     else:
         print("[DRY RUN] Telegram 不發送")

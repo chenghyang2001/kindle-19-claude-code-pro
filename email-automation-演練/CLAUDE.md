@@ -37,9 +37,12 @@ python run_briefing.py --dry-run
 | Python | 3.9+ | 使用內建 `zoneinfo`（不需 pytz）|
 | requests | 2.x | Telegram Bot API HTTP 呼叫 |
 | python-dotenv | 1.x | 載入 `.env` 環境變數 |
-| Claude Code CLI | 最新 | `subprocess` 呼叫 `claude -p`（用 Max 訂閱）|
-| Gmail MCP | claude.ai 內建 | 由 `claude -p` 呼叫，不需另外安裝 |
-| Notion MCP | claude.ai 內建 | 由 `claude -p` 呼叫，不需另外安裝 |
+| anthropic | 0.40+ | 直接呼叫 Claude API（CI/GitHub Actions 路徑）|
+| notion-client | 2.2+ | 直接呼叫 Notion API（CI/GitHub Actions 路徑）|
+| google-auth / google-api-python-client | 2.x | Gmail OAuth2（CI/GitHub Actions 路徑）|
+| Claude Code CLI | 最新 | `subprocess` 呼叫 `claude -p`（本機 Max 訂閱路徑）|
+| Gmail MCP | claude.ai 內建 | 本機執行時由 `claude -p` 呼叫 |
+| Notion MCP | claude.ai 內建 | 本機執行時由 `claude -p` 呼叫 |
 | Telegram Bot API | v7 | 直接 HTTP POST，不需 SDK |
 
 **安裝**：
@@ -59,15 +62,23 @@ email-automation-演練/
 ├── run_briefing.py        # 主控協調器（Orchestrator）
 ├── email_filter.py        # Layer1 規則過濾 + Layer2 Claude AI 判斷
 ├── summarizer.py          # Claude AI → JSON-only 結構化摘要
-├── notion_creator.py      # Notion MCP → 建立任務卡片
+├── notion_creator.py      # 建立 Notion 任務卡片（雙模式）
 ├── telegram_briefer.py    # Telegram Bot API → 晨間簡報
+├── gmail_fetcher.py       # Gmail OAuth2 直接抓信（CI/CD 用）
 ├── cache.py               # 冪等快取（.cache/processed_ids.json）
 ├── CLAUDE.md              # 本文件
 ├── .env.example           # 環境變數範本（不含真實值）
 ├── .env                   # 真實環境變數（gitignore）
 ├── requirements.txt
+├── scripts/
+│   └── setup_gmail_token.py  # 一次性 OAuth2 Token 設定工具
+├── .github/
+│   └── workflows/
+│       ├── ci.yml             # PR/push 觸發：syntax check + dry-run
+│       └── daily-briefing.yml # 排程：每日 09:00 台灣時間（周一~五）
 └── .cache/
-    └── processed_ids.json # 已處理的 Gmail message_id（防重複）
+    ├── processed_ids.json # 已處理的 Gmail message_id（防重複）
+    └── today_emails.json  # gmail_fetcher.py 預取快取
 ```
 
 **設計模式**：
@@ -108,7 +119,7 @@ email-automation-演練/
 ### 🔴 絕對禁止
 
 - **禁止在 Python 程式碼中硬編碼任何 API Key / Token**：全部從 `os.environ` 讀取
-- **禁止直接呼叫 Gmail API 或 Notion API**：一律透過 `claude -p` + MCP，不用 google-auth 或 notion-client
+- **禁止直接呼叫 Gmail API 或 Notion API**（本機開發路徑）：一律透過 `claude -p` + MCP；例外：`gmail_fetcher.py` 與 `notion_creator.py` 在偵測到 `GMAIL_TOKEN_JSON` / `NOTION_API_KEY` 環境變數時使用直接 API，此為 GitHub Actions CI/CD 設計，本機開發不需設定這兩個變數
 - **禁止用 `os.environ.get("KEY", "")` 靜默掩蓋缺少的環境變數**：缺少時應讓程式立即 sys.exit(1)
 - **禁止在 `cache.py` 之外直接讀寫 `.cache/processed_ids.json`**：所有快取操作集中在 `cache.py`
 - **禁止在正式執行時跳過 Layer1 過濾**：Layer1 是成本保護機制，移除會導致 API 費用爆增

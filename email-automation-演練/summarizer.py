@@ -3,13 +3,22 @@ summarizer.py — 呼叫 Claude CLI 將電子郵件摘要為結構化 JSON
 
 用途：接收一封 email dict，透過 subprocess 呼叫 `claude -p` 取得
       JSON 格式的摘要結果，並將 detected_deadline 標準化為 YYYY-MM-DD。
+
+雙模式執行：
+- 若環境變數 ANTHROPIC_API_KEY 已設定 → 直接呼叫 Anthropic Python SDK（消耗 API Credits）
+- 若未設定 → 退回 subprocess `claude -p` stdin 模式（沿用 Max 訂閱額度，成本為零）
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
 from datetime import date, timedelta
+
+import anthropic
+
+CLAUDE_CMD = "claude.cmd" if sys.platform == "win32" else "claude"
 
 
 # 星期名稱對應 Python weekday（週一=0 … 週日=6）
@@ -88,12 +97,135 @@ def _parse_deadline(deadline_str: str | None) -> str | None:
     return None
 
 
-def summarize_email(email: dict) -> dict | None:
+def _parse_summary_output(output: str) -> dict | None:
     """
-    呼叫 Claude CLI 對單封電子郵件產生結構化摘要。
+    從 Claude 輸出字串中萃取並驗證 JSON 摘要物件。
+
+    為何抽出為獨立函式：API 路徑和 subprocess 路徑共用相同的 JSON 解析邏輯，
+    避免重複程式碼（DRY 原則）。
+
+    Args:
+        output: Claude 回傳的原始字串，可能含前後雜訊。
+
+    Returns:
+        解析後的摘要字典（含標準化欄位）；解析失敗時回傳 None。
+    """
+    # 從輸出中萃取第一個符合結構的 JSON 物件
+    # 為何用 re 而非直接 json.loads：Claude 偶爾會在 JSON 前後夾帶說明文字
+    match = re.search(
+        r'\{[^{}]*"one_liner"[^{}]*\}',
+        output,
+        re.DOTALL,
+    )
+    if not match:
+        print(
+            f"[summarizer] 無法在輸出中找到 JSON 物件。stdout={output!r}",
+            file=sys.stderr,
+        )
+        return None
+
+    parsed: dict = json.loads(match.group(0))
+
+    # 標準化截止日期
+    raw_deadline = parsed.get("detected_deadline")
+    parsed["detected_deadline"] = _parse_deadline(raw_deadline)
+
+    # 確保 priority_score 是 1-5 的整數（Claude 偶爾回傳字串或超界值）
+    try:
+        score = int(parsed["priority_score"])
+        parsed["priority_score"] = max(1, min(5, score))
+    except (KeyError, ValueError, TypeError):
+        # 若欄位完全缺失或型別非法，預設給中等優先度
+        parsed["priority_score"] = 3
+
+    return parsed
+
+
+def _summarize_via_api(prompt: str) -> dict | None:
+    """
+    透過 Anthropic Python SDK 直接呼叫 Claude API 取得摘要。
+
+    為何選 Haiku：成本最低，摘要任務不需要高階推理能力，
+    符合 cost-rules.md「格式化、摘要、通知 → Haiku」原則。
+
+    Args:
+        prompt: 已組裝好的完整 prompt 字串。
+
+    Returns:
+        解析後的摘要字典；API 呼叫或 JSON 解析失敗時回傳 None。
+    """
+    try:
+        # auto-reads ANTHROPIC_API_KEY from environment
+        client = anthropic.Anthropic()
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        output = message.content[0].text
+        return _parse_summary_output(output)
+
+    except anthropic.APIConnectionError as exc:
+        print(f"[summarizer] Anthropic API 連線失敗：{exc}", file=sys.stderr)
+        return None
+    except anthropic.APITimeoutError as exc:
+        print(f"[summarizer] Anthropic API 呼叫逾時：{exc}", file=sys.stderr)
+        return None
+    except anthropic.APIError as exc:
+        print(f"[summarizer] Anthropic API 錯誤（狀態碼 {exc.status_code}）：{exc}", file=sys.stderr)
+        return None
+    except json.JSONDecodeError as exc:
+        print(f"[summarizer] JSON 解析失敗（API 路徑）：{exc}", file=sys.stderr)
+        return None
+
+
+def _summarize_via_subprocess(prompt: str) -> dict | None:
+    """
+    透過 subprocess 呼叫 `claude -p` stdin 模式取得摘要。
 
     為何用 subprocess 而非 API：沿用 Max 訂閱額度（不消耗 API Credits），
     符合 cost-rules.md 的成本保護原則。
+
+    Args:
+        prompt: 已組裝好的完整 prompt 字串。
+
+    Returns:
+        解析後的摘要字典；呼叫逾時或 JSON 解析失敗時回傳 None。
+    """
+    try:
+        result = subprocess.run(
+            [CLAUDE_CMD, "-p"],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+        )
+
+        output = result.stdout
+        return _parse_summary_output(output)
+
+    except subprocess.TimeoutExpired:
+        print("[summarizer] claude CLI 呼叫逾時（> 60s）", file=sys.stderr)
+        return None
+    except json.JSONDecodeError as exc:
+        print(f"[summarizer] JSON 解析失敗（subprocess 路徑）：{exc}", file=sys.stderr)
+        return None
+    except KeyError as exc:
+        print(f"[summarizer] 缺少必要欄位：{exc}", file=sys.stderr)
+        return None
+    except ValueError as exc:
+        print(f"[summarizer] 數值錯誤：{exc}", file=sys.stderr)
+        return None
+
+
+def summarize_email(email: dict) -> dict | None:
+    """
+    呼叫 Claude 對單封電子郵件產生結構化摘要。
+
+    模式選擇依據 cost-rules.md：
+    - ANTHROPIC_API_KEY 已設定 → 走 API 路徑（消耗 Credits，速度較快）
+    - 未設定 → 走 subprocess 路徑（沿用 Max 訂閱，成本為零）
 
     Args:
         email: 包含 sender、subject、body 欄位的字典。
@@ -122,59 +254,10 @@ def summarize_email(email: dict) -> dict | None:
         f"{body}"
     )
 
-    try:
-        result = subprocess.run(
-            ["claude", "-p", prompt],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            timeout=60,
-        )
-
-        output = result.stdout
-
-        # 從輸出中萃取第一個符合結構的 JSON 物件
-        # 為何用 re 而非直接 json.loads：Claude 偶爾會在 JSON 前後夾帶說明文字
-        match = re.search(
-            r'\{[^{}]*"one_liner"[^{}]*\}',
-            output,
-            re.DOTALL,
-        )
-        if not match:
-            print(
-                f"[summarizer] 無法在輸出中找到 JSON 物件。stdout={output!r}",
-                file=sys.stderr,
-            )
-            return None
-
-        parsed: dict = json.loads(match.group(0))
-
-        # 標準化截止日期
-        raw_deadline = parsed.get("detected_deadline")
-        parsed["detected_deadline"] = _parse_deadline(raw_deadline)
-
-        # 確保 priority_score 是 1-5 的整數（Claude 偶爾回傳字串或超界值）
-        try:
-            score = int(parsed["priority_score"])
-            parsed["priority_score"] = max(1, min(5, score))
-        except (KeyError, ValueError, TypeError):
-            # 若欄位完全缺失或型別非法，預設給中等優先度
-            parsed["priority_score"] = 3
-
-        return parsed
-
-    except subprocess.TimeoutExpired:
-        print("[summarizer] claude CLI 呼叫逾時（> 60s）", file=sys.stderr)
-        return None
-    except json.JSONDecodeError as exc:
-        print(f"[summarizer] JSON 解析失敗：{exc}", file=sys.stderr)
-        return None
-    except KeyError as exc:
-        print(f"[summarizer] 缺少必要欄位：{exc}", file=sys.stderr)
-        return None
-    except ValueError as exc:
-        print(f"[summarizer] 數值錯誤：{exc}", file=sys.stderr)
-        return None
+    # 依環境變數選擇執行路徑
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return _summarize_via_api(prompt)
+    return _summarize_via_subprocess(prompt)
 
 
 # ---------------------------------------------------------------------------

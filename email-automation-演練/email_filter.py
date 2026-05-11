@@ -9,9 +9,14 @@
 - Claude CLI 失敗時回傳 False（保留郵件），確保可靠性
 """
 
+import os
 import subprocess
 import sys
 from typing import Any
+
+import anthropic
+
+CLAUDE_CMD = "claude.cmd" if sys.platform == "win32" else "claude"
 
 
 # ── 第一層：規則清單 ──────────────────────────────────────────
@@ -70,33 +75,62 @@ def should_skip_rule(email: dict[str, Any]) -> bool:
 
 # ── 第二層函式 ────────────────────────────────────────────────
 
-def should_skip_ai(email: dict[str, Any]) -> bool:
+def _ai_judge_via_api(prompt: str) -> bool:
     """
-    Claude AI 判斷層：僅針對規則層無法明確判斷的模糊郵件使用。
+    透過 Anthropic Python SDK 直接呼叫 API 判斷郵件。
 
-    呼叫本機 claude CLI，詢問「此郵件是否需要回應或行動」。
-    保守策略：
-      - 僅當 AI 明確回答 NO（且不含 YES 或 MAYBE）時才跳過
-      - CLI 逾時或找不到時，回傳 False（保留郵件）
+    當 ANTHROPIC_API_KEY 環境變數存在時使用此通路，
+    比 subprocess 更快且不依賴本機 claude CLI 安裝。
+
+    Args:
+        prompt: 已組好的提問字串
 
     Returns:
-        True  → AI 確定不需要回應，跳過
-        False → 需要回應 / 不確定 / CLI 失敗 → 保留
+        True  → AI 明確回答 NO，跳過郵件
+        False → YES / MAYBE / 呼叫失敗 → 保留郵件（保守策略）
     """
-    subject: str = email.get("subject") or "(無主旨)"
-    snippet: str = (email.get("snippet") or "")[:300]
+    try:
+        client = anthropic.Anthropic()
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=10,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        answer: str = message.content[0].text.strip().upper()
 
-    prompt = (
-        "You are an email triage assistant.\n"
-        f"Email subject: {subject}\n"
-        f"Email preview: {snippet}\n\n"
-        "Does this email require a response or action from the recipient? "
-        "Reply with ONLY one word: YES, NO, or MAYBE."
-    )
+        # 僅在明確 NO（且不含 YES/MAYBE）時才跳過
+        if "NO" in answer and "YES" not in answer and "MAYBE" not in answer:
+            return True
+        return False
 
+    except anthropic.APIError as exc:
+        # Anthropic API 錯誤（網路、認證、限流等）→ 保留郵件（保守策略）
+        print(f"[AI filter] Anthropic API 錯誤，保留郵件（保守策略）：{exc}", file=sys.stderr)
+        return False
+    except Exception as exc:  # noqa: BLE001
+        # 其他未預期例外 → 保留郵件（保守策略）
+        print(f"[AI filter] API 通路發生未預期錯誤，保留郵件（保守策略）：{exc}", file=sys.stderr)
+        return False
+
+
+def _ai_judge_via_subprocess(prompt: str) -> bool:
+    """
+    透過本機 claude CLI（subprocess stdin 模式）判斷郵件。
+
+    當 ANTHROPIC_API_KEY 未設定時使用此通路，
+    依賴 Max 訂閱額度，不消耗 API Credits。
+
+    Args:
+        prompt: 已組好的提問字串
+
+    Returns:
+        True  → AI 明確回答 NO，跳過郵件
+        False → YES / MAYBE / CLI 失敗 → 保留郵件（保守策略）
+    """
     try:
         result = subprocess.run(
-            ["claude", "-p", prompt],
+            [CLAUDE_CMD, "-p"],
+            input=prompt,
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -117,6 +151,39 @@ def should_skip_ai(email: dict[str, Any]) -> bool:
         # 找不到 claude CLI → 保留郵件
         print("[AI filter] 找不到 claude CLI，保留郵件（保守策略）", file=sys.stderr)
         return False
+
+
+def should_skip_ai(email: dict[str, Any]) -> bool:
+    """
+    Claude AI 判斷層：僅針對規則層無法明確判斷的模糊郵件使用。
+
+    雙模式派發：
+      - ANTHROPIC_API_KEY 存在 → 直接呼叫 Anthropic SDK（_ai_judge_via_api）
+      - 未設定 → 回退到 subprocess claude -p 模式（_ai_judge_via_subprocess）
+
+    保守策略：
+      - 僅當 AI 明確回答 NO（且不含 YES 或 MAYBE）時才跳過
+      - 任何失敗均回傳 False（保留郵件），避免遺漏重要信件
+
+    Returns:
+        True  → AI 確定不需要回應，跳過
+        False → 需要回應 / 不確定 / 呼叫失敗 → 保留
+    """
+    subject: str = email.get("subject") or "(無主旨)"
+    snippet: str = (email.get("snippet") or "")[:300]
+
+    prompt = (
+        "You are an email triage assistant.\n"
+        f"Email subject: {subject}\n"
+        f"Email preview: {snippet}\n\n"
+        "Does this email require a response or action from the recipient? "
+        "Reply with ONLY one word: YES, NO, or MAYBE."
+    )
+
+    # 雙模式派發：有 API key 走 SDK（快、省 CLI 依賴），否則走 subprocess
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return _ai_judge_via_api(prompt)
+    return _ai_judge_via_subprocess(prompt)
 
 
 # ── 主篩選函式 ────────────────────────────────────────────────
