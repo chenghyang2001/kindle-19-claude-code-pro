@@ -98,6 +98,16 @@ body{background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;height:10
 #prev:hover,#next:hover{background:#475569}
 #slide-info{flex:1;text-align:center;font-size:12px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #fit-btn{background:#1e3a5f;border:1px solid #38bdf8;color:#7dd3fc;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:11px}
+.auto-wrap{position:relative}
+.auto-group{display:flex}
+#auto-btn{background:#1e3a5f;border:1px solid #38bdf8;border-right:none;color:#7dd3fc;padding:3px 10px;border-radius:6px 0 0 6px;cursor:pointer;font-size:11px;white-space:nowrap}
+#auto-btn.playing{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
+#auto-speed-btn{background:#1e3a5f;border:1px solid #38bdf8;color:#7dd3fc;padding:3px 6px;border-radius:0 6px 6px 0;cursor:pointer;font-size:11px}
+#auto-speed-btn.playing{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
+#speed-menu{position:absolute;bottom:calc(100% + 4px);right:0;background:#1e293b;border:1px solid #334155;border-radius:6px;overflow:hidden;display:none;z-index:100;min-width:80px}
+#speed-menu.open{display:block}
+.speed-opt{display:block;padding:6px 16px;font-size:11px;color:#94a3b8;cursor:pointer;white-space:nowrap;background:none;border:none;width:100%;text-align:left}
+.speed-opt:hover,.speed-opt.selected{background:#1e3a5f;color:#e0f2fe}
 #thumbs{height:90px;background:#0f172a;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:4px;padding:4px 8px;flex-shrink:0;border-top:1px solid #1e293b;scrollbar-width:thin}
 .thumb{height:76px;width:auto;cursor:pointer;border:2px solid transparent;border-radius:3px;opacity:.6;flex-shrink:0;transition:all .15s}
 .thumb.active{border-color:#38bdf8;opacity:1}
@@ -120,6 +130,18 @@ body{background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;height:10
       <div id="slide-info">1 / __TOTAL__</div>
       <button id="next">►</button>
       <button id="fit-btn">Fit</button>
+      <div class="auto-wrap">
+        <div class="auto-group">
+          <button id="auto-btn">&#9658; 自動播放</button>
+          <button id="auto-speed-btn">&#9660;</button>
+        </div>
+        <div id="speed-menu">
+          <button class="speed-opt selected" data-ms="3000">3 秒</button>
+          <button class="speed-opt" data-ms="5000">5 秒</button>
+          <button class="speed-opt" data-ms="10000">10 秒</button>
+          <button class="speed-opt" data-ms="15000">15 秒</button>
+        </div>
+      </div>
     </div>
     <div id="thumbs"></div>
   </div>
@@ -190,6 +212,37 @@ document.addEventListener("keydown",e=>{
 document.getElementById("prev").onclick=()=>goTo(cur-1);
 document.getElementById("next").onclick=()=>goTo(cur+1);
 document.getElementById("fit-btn").onclick=()=>loadImage();
+let autoTimer=null,autoMs=3000;
+const autoBtn=document.getElementById("auto-btn");
+const autoSpeedBtn=document.getElementById("auto-speed-btn");
+const speedMenu=document.getElementById("speed-menu");
+function stopAutoPlay(){
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+  autoBtn.textContent="▶ 自動播放";
+  autoBtn.classList.remove("playing");
+  autoSpeedBtn.classList.remove("playing");
+}
+function startAutoPlay(){
+  stopAutoPlay();
+  autoTimer=setInterval(()=>goTo(cur+1>=IMAGES.length?0:cur+1),autoMs);
+  autoBtn.textContent="⏸ 自動播放";
+  autoBtn.classList.add("playing");
+  autoSpeedBtn.classList.add("playing");
+}
+autoBtn.onclick=()=>{autoTimer?stopAutoPlay():startAutoPlay();};
+autoSpeedBtn.onclick=(e)=>{e.stopPropagation();speedMenu.classList.toggle("open");};
+document.addEventListener("click",()=>speedMenu.classList.remove("open"));
+document.querySelectorAll(".speed-opt").forEach(btn=>{
+  btn.onclick=(e)=>{
+    e.stopPropagation();
+    autoMs=+btn.dataset.ms;
+    document.querySelectorAll(".speed-opt").forEach(b=>b.classList.remove("selected"));
+    btn.classList.add("selected");
+    speedMenu.classList.remove("open");
+    if(autoTimer)startAutoPlay();
+  };
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")stopAutoPlay();},true);
 goTo(0);
 </script>
 </body>
