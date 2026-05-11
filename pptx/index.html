@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude Code Pro — 投影片瀏覽器</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#header{background:#1e293b;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;border-bottom:1px solid #334155}
+#title{font-size:15px;font-weight:600;color:#38bdf8;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#badge{background:#0ea5e9;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
+#zoom-badge{background:#1e3a5f;color:#7dd3fc;padding:2px 8px;border-radius:12px;font-size:12px;white-space:nowrap}
+#tips{color:#94a3b8;font-size:11px;white-space:nowrap}
+#main{display:flex;flex:1;overflow:hidden;min-height:0}
+#sidebar{width:200px;background:#1e293b;border-right:1px solid #334155;overflow-y:auto;flex-shrink:0;padding:8px 0}
+#sidebar h3{font-size:11px;color:#64748b;padding:8px 12px 4px;text-transform:uppercase;letter-spacing:.05em}
+.ch-btn{display:block;width:100%;text-align:left;padding:6px 12px;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;border-left:2px solid transparent;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-btn:hover{background:#1e3a5f;color:#e2e8f0}
+.ch-btn.active{background:#1e3a5f;border-left-color:#38bdf8;color:#e0f2fe;font-weight:600}
+#viewer-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#viewer{flex:1;overflow:hidden;position:relative;background:#0f172a;cursor:grab;user-select:none}
+#viewer.dragging{cursor:grabbing}
+#img{position:absolute;transform-origin:0 0;max-width:none;pointer-events:none}
+#nav-bar{background:#1e293b;padding:6px 12px;display:flex;align-items:center;gap:8px;border-top:1px solid #334155;flex-shrink:0}
+#prev,#next{background:#334155;border:none;color:#e2e8f0;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+#prev:hover,#next:hover{background:#475569}
+#slide-info{flex:1;text-align:center;font-size:12px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fit-btn{background:#1e3a5f;border:1px solid #38bdf8;color:#7dd3fc;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:11px}
+.auto-wrap{position:relative}
+.auto-group{display:flex}
+#auto-btn{background:#1e3a5f;border:1px solid #38bdf8;border-right:none;color:#7dd3fc;padding:3px 10px;border-radius:6px 0 0 6px;cursor:pointer;font-size:11px;white-space:nowrap}
+#auto-btn.playing{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
+#auto-speed-btn{background:#1e3a5f;border:1px solid #38bdf8;color:#7dd3fc;padding:3px 6px;border-radius:0 6px 6px 0;cursor:pointer;font-size:11px}
+#auto-speed-btn.playing{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
+#speed-menu{position:absolute;bottom:calc(100% + 4px);right:0;background:#1e293b;border:1px solid #334155;border-radius:6px;overflow:hidden;display:none;z-index:100;min-width:80px}
+#speed-menu.open{display:block}
+.speed-opt{display:block;padding:6px 16px;font-size:11px;color:#94a3b8;cursor:pointer;white-space:nowrap;background:none;border:none;width:100%;text-align:left}
+.speed-opt:hover,.speed-opt.selected{background:#1e3a5f;color:#e0f2fe}
+#thumbs{height:90px;background:#0f172a;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:4px;padding:4px 8px;flex-shrink:0;border-top:1px solid #1e293b;scrollbar-width:thin}
+.thumb{height:76px;width:auto;cursor:pointer;border:2px solid transparent;border-radius:3px;opacity:.6;flex-shrink:0;transition:all .15s}
+.thumb.active{border-color:#38bdf8;opacity:1}
+.thumb:hover{opacity:.85}
+</style>
+</head>
+<body>
+<div id="header">
+  <div id="title">Claude Code Pro — 投影片瀏覽器</div>
+  <span id="badge">266 張</span>
+  <span id="zoom-badge">100%</span>
+  <span id="tips">← → 換頁 · 滾輪縮放 · 拖曳平移 · 雙擊還原</span>
+</div>
+<div id="main">
+  <div id="sidebar"><h3>章節</h3><div id="ch-list"></div></div>
+  <div id="viewer-wrap">
+    <div id="viewer"><img id="img" src="" alt=""></div>
+    <div id="nav-bar">
+      <button id="prev">◄</button>
+      <div id="slide-info">1 / 266</div>
+      <button id="next">►</button>
+      <button id="fit-btn">Fit</button>
+      <div class="auto-wrap">
+        <div class="auto-group">
+          <button id="auto-btn">▶ 自動播放</button>
+          <button id="auto-speed-btn">▼</button>
+        </div>
+        <div id="speed-menu">
+          <button class="speed-opt selected" data-ms="3000">3 秒</button>
+          <button class="speed-opt" data-ms="5000">5 秒</button>
+          <button class="speed-opt" data-ms="10000">10 秒</button>
+          <button class="speed-opt" data-ms="15000">15 秒</button>
+        </div>
+      </div>
+    </div>
+    <div id="thumbs"></div>
+  </div>
+</div>
+<script>
+const IMAGES=[{"file": "png/第01章_從聊天機器人到開發夥伴-s001.png", "label": "第01章 從聊天機器人到開發夥伴 [001]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s002.png", "label": "第01章 從聊天機器人到開發夥伴 [002]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s003.png", "label": "第01章 從聊天機器人到開發夥伴 [003]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s004.png", "label": "第01章 從聊天機器人到開發夥伴 [004]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s005.png", "label": "第01章 從聊天機器人到開發夥伴 [005]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s006.png", "label": "第01章 從聊天機器人到開發夥伴 [006]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s007.png", "label": "第01章 從聊天機器人到開發夥伴 [007]"},{"file": "png/第01章_從聊天機器人到開發夥伴-s008.png", "label": "第01章 從聊天機器人到開發夥伴 [008]"},{"file": "png/第02章_真正有效的提示詞技巧-s001.png", "label": "第02章 真正有效的提示詞技巧 [001]"},{"file": "png/第02章_真正有效的提示詞技巧-s002.png", "label": "第02章 真正有效的提示詞技巧 [002]"},{"file": "png/第02章_真正有效的提示詞技巧-s003.png", "label": "第02章 真正有效的提示詞技巧 [003]"},{"file": "png/第02章_真正有效的提示詞技巧-s004.png", "label": "第02章 真正有效的提示詞技巧 [004]"},{"file": "png/第02章_真正有效的提示詞技巧-s005.png", "label": "第02章 真正有效的提示詞技巧 [005]"},{"file": "png/第02章_真正有效的提示詞技巧-s006.png", "label": "第02章 真正有效的提示詞技巧 [006]"},{"file": "png/第02章_真正有效的提示詞技巧-s007.png", "label": "第02章 真正有效的提示詞技巧 [007]"},{"file": "png/第02章_真正有效的提示詞技巧-s008.png", "label": "第02章 真正有效的提示詞技巧 [008]"},{"file": "png/第02章_真正有效的提示詞技巧-s009.png", "label": "第02章 真正有效的提示詞技巧 [009]"},{"file": "png/第02章_真正有效的提示詞技巧-s010.png", "label": "第02章 真正有效的提示詞技巧 [010]"},{"file": "png/第02章_真正有效的提示詞技巧-s011.png", "label": "第02章 真正有效的提示詞技巧 [011]"},{"file": "png/第02章_真正有效的提示詞技巧-s012.png", "label": "第02章 真正有效的提示詞技巧 [012]"},{"file": "png/第02章_真正有效的提示詞技巧-s013.png", "label": "第02章 真正有效的提示詞技巧 [013]"},{"file": "png/第02章_真正有效的提示詞技巧-s014.png", "label": "第02章 真正有效的提示詞技巧 [014]"},{"file": "png/第02章_真正有效的提示詞技巧-s015.png", "label": "第02章 真正有效的提示詞技巧 [015]"},{"file": "png/第02章_真正有效的提示詞技巧-s016.png", "label": "第02章 真正有效的提示詞技巧 [016]"},{"file": "png/第02章_真正有效的提示詞技巧-s017.png", "label": "第02章 真正有效的提示詞技巧 [017]"},{"file": "png/第02章_真正有效的提示詞技巧-s018.png", "label": "第02章 真正有效的提示詞技巧 [018]"},{"file": "png/第03章_建立專業開發環境-s001.png", "label": "第03章 建立專業開發環境 [001]"},{"file": "png/第03章_建立專業開發環境-s002.png", "label": "第03章 建立專業開發環境 [002]"},{"file": "png/第03章_建立專業開發環境-s003.png", "label": "第03章 建立專業開發環境 [003]"},{"file": "png/第03章_建立專業開發環境-s004.png", "label": "第03章 建立專業開發環境 [004]"},{"file": "png/第03章_建立專業開發環境-s005.png", "label": "第03章 建立專業開發環境 [005]"},{"file": "png/第03章_建立專業開發環境-s006.png", "label": "第03章 建立專業開發環境 [006]"},{"file": "png/第03章_建立專業開發環境-s007.png", "label": "第03章 建立專業開發環境 [007]"},{"file": "png/第03章_建立專業開發環境-s008.png", "label": "第03章 建立專業開發環境 [008]"},{"file": "png/第03章_建立專業開發環境-s009.png", "label": "第03章 建立專業開發環境 [009]"},{"file": "png/第03章_建立專業開發環境-s010.png", "label": "第03章 建立專業開發環境 [010]"},{"file": "png/第04章_生產級程式碼-s001.png", "label": "第04章 生產級程式碼 [001]"},{"file": "png/第04章_生產級程式碼-s002.png", "label": "第04章 生產級程式碼 [002]"},{"file": "png/第04章_生產級程式碼-s003.png", "label": "第04章 生產級程式碼 [003]"},{"file": "png/第04章_生產級程式碼-s004.png", "label": "第04章 生產級程式碼 [004]"},{"file": "png/第04章_生產級程式碼-s005.png", "label": "第04章 生產級程式碼 [005]"},{"file": "png/第04章_生產級程式碼-s006.png", "label": "第04章 生產級程式碼 [006]"},{"file": "png/第04章_生產級程式碼-s007.png", "label": "第04章 生產級程式碼 [007]"},{"file": "png/第04章_生產級程式碼-s008.png", "label": "第04章 生產級程式碼 [008]"},{"file": "png/第04章_生產級程式碼-s009.png", "label": "第04章 生產級程式碼 [009]"},{"file": "png/第04章_生產級程式碼-s010.png", "label": "第04章 生產級程式碼 [010]"},{"file": "png/第04章_生產級程式碼-s011.png", "label": "第04章 生產級程式碼 [011]"},{"file": "png/第04章_生產級程式碼-s012.png", "label": "第04章 生產級程式碼 [012]"},{"file": "png/第05章_快速除錯-s001.png", "label": "第05章 快速除錯 [001]"},{"file": "png/第05章_快速除錯-s002.png", "label": "第05章 快速除錯 [002]"},{"file": "png/第05章_快速除錯-s003.png", "label": "第05章 快速除錯 [003]"},{"file": "png/第05章_快速除錯-s004.png", "label": "第05章 快速除錯 [004]"},{"file": "png/第05章_快速除錯-s005.png", "label": "第05章 快速除錯 [005]"},{"file": "png/第05章_快速除錯-s006.png", "label": "第05章 快速除錯 [006]"},{"file": "png/第05章_快速除錯-s007.png", "label": "第05章 快速除錯 [007]"},{"file": "png/第05章_快速除錯-s008.png", "label": "第05章 快速除錯 [008]"},{"file": "png/第05章_快速除錯-s009.png", "label": "第05章 快速除錯 [009]"},{"file": "png/第05章_快速除錯-s010.png", "label": "第05章 快速除錯 [010]"},{"file": "png/第05章_快速除錯-s011.png", "label": "第05章 快速除錯 [011]"},{"file": "png/第05章_快速除錯-s012.png", "label": "第05章 快速除錯 [012]"},{"file": "png/第05章_快速除錯-s013.png", "label": "第05章 快速除錯 [013]"},{"file": "png/第05章_快速除錯-s014.png", "label": "第05章 快速除錯 [014]"},{"file": "png/第05章_快速除錯-s015.png", "label": "第05章 快速除錯 [015]"},{"file": "png/第05章_快速除錯-s016.png", "label": "第05章 快速除錯 [016]"},{"file": "png/第05章_快速除錯-s017.png", "label": "第05章 快速除錯 [017]"},{"file": "png/第05章_快速除錯-s018.png", "label": "第05章 快速除錯 [018]"},{"file": "png/第06章_無痛測試-s001.png", "label": "第06章 無痛測試 [001]"},{"file": "png/第06章_無痛測試-s002.png", "label": "第06章 無痛測試 [002]"},{"file": "png/第06章_無痛測試-s003.png", "label": "第06章 無痛測試 [003]"},{"file": "png/第06章_無痛測試-s004.png", "label": "第06章 無痛測試 [004]"},{"file": "png/第06章_無痛測試-s005.png", "label": "第06章 無痛測試 [005]"},{"file": "png/第06章_無痛測試-s006.png", "label": "第06章 無痛測試 [006]"},{"file": "png/第06章_無痛測試-s007.png", "label": "第06章 無痛測試 [007]"},{"file": "png/第06章_無痛測試-s008.png", "label": "第06章 無痛測試 [008]"},{"file": "png/第06章_無痛測試-s009.png", "label": "第06章 無痛測試 [009]"},{"file": "png/第06章_無痛測試-s010.png", "label": "第06章 無痛測試 [010]"},{"file": "png/第06章_無痛測試-s011.png", "label": "第06章 無痛測試 [011]"},{"file": "png/第06章_無痛測試-s012.png", "label": "第06章 無痛測試 [012]"},{"file": "png/第06章_無痛測試-s013.png", "label": "第06章 無痛測試 [013]"},{"file": "png/第06章_無痛測試-s014.png", "label": "第06章 無痛測試 [014]"},{"file": "png/第06章_無痛測試-s015.png", "label": "第06章 無痛測試 [015]"},{"file": "png/第06章_無痛測試-s016.png", "label": "第06章 無痛測試 [016]"},{"file": "png/第06章_無痛測試-s017.png", "label": "第06章 無痛測試 [017]"},{"file": "png/第07章_無懼重構-s001.png", "label": "第07章 無懼重構 [001]"},{"file": "png/第07章_無懼重構-s002.png", "label": "第07章 無懼重構 [002]"},{"file": "png/第07章_無懼重構-s003.png", "label": "第07章 無懼重構 [003]"},{"file": "png/第07章_無懼重構-s004.png", "label": "第07章 無懼重構 [004]"},{"file": "png/第07章_無懼重構-s005.png", "label": "第07章 無懼重構 [005]"},{"file": "png/第07章_無懼重構-s006.png", "label": "第07章 無懼重構 [006]"},{"file": "png/第07章_無懼重構-s007.png", "label": "第07章 無懼重構 [007]"},{"file": "png/第07章_無懼重構-s008.png", "label": "第07章 無懼重構 [008]"},{"file": "png/第07章_無懼重構-s009.png", "label": "第07章 無懼重構 [009]"},{"file": "png/第07章_無懼重構-s010.png", "label": "第07章 無懼重構 [010]"},{"file": "png/第07章_無懼重構-s011.png", "label": "第07章 無懼重構 [011]"},{"file": "png/第07章_無懼重構-s012.png", "label": "第07章 無懼重構 [012]"},{"file": "png/第07章_無懼重構-s013.png", "label": "第07章 無懼重構 [013]"},{"file": "png/第07章_無懼重構-s014.png", "label": "第07章 無懼重構 [014]"},{"file": "png/第07章_無懼重構-s015.png", "label": "第07章 無懼重構 [015]"},{"file": "png/第07章_無懼重構-s016.png", "label": "第07章 無懼重構 [016]"},{"file": "png/第07章_無懼重構-s017.png", "label": "第07章 無懼重構 [017]"},{"file": "png/第07章_無懼重構-s018.png", "label": "第07章 無懼重構 [018]"},{"file": "png/第07章_無懼重構-s019.png", "label": "第07章 無懼重構 [019]"},{"file": "png/第07章_無懼重構-s020.png", "label": "第07章 無懼重構 [020]"},{"file": "png/第07章_無懼重構-s021.png", "label": "第07章 無懼重構 [021]"},{"file": "png/第08章_Agentic工作流程-s001.png", "label": "第08章 Agentic工作流程 [001]"},{"file": "png/第08章_Agentic工作流程-s002.png", "label": "第08章 Agentic工作流程 [002]"},{"file": "png/第08章_Agentic工作流程-s003.png", "label": "第08章 Agentic工作流程 [003]"},{"file": "png/第08章_Agentic工作流程-s004.png", "label": "第08章 Agentic工作流程 [004]"},{"file": "png/第08章_Agentic工作流程-s005.png", "label": "第08章 Agentic工作流程 [005]"},{"file": "png/第08章_Agentic工作流程-s006.png", "label": "第08章 Agentic工作流程 [006]"},{"file": "png/第08章_Agentic工作流程-s007.png", "label": "第08章 Agentic工作流程 [007]"},{"file": "png/第08章_Agentic工作流程-s008.png", "label": "第08章 Agentic工作流程 [008]"},{"file": "png/第08章_Agentic工作流程-s009.png", "label": "第08章 Agentic工作流程 [009]"},{"file": "png/第08章_Agentic工作流程-s010.png", "label": "第08章 Agentic工作流程 [010]"},{"file": "png/第08章_Agentic工作流程-s011.png", "label": "第08章 Agentic工作流程 [011]"},{"file": "png/第08章_Agentic工作流程-s012.png", "label": "第08章 Agentic工作流程 [012]"},{"file": "png/第08章_Agentic工作流程-s013.png", "label": "第08章 Agentic工作流程 [013]"},{"file": "png/第08章_Agentic工作流程-s014.png", "label": "第08章 Agentic工作流程 [014]"},{"file": "png/第08章_Agentic工作流程-s015.png", "label": "第08章 Agentic工作流程 [015]"},{"file": "png/第08章_Agentic工作流程-s016.png", "label": "第08章 Agentic工作流程 [016]"},{"file": "png/第08章_Agentic工作流程-s017.png", "label": "第08章 Agentic工作流程 [017]"},{"file": "png/第08章_Agentic工作流程-s018.png", "label": "第08章 Agentic工作流程 [018]"},{"file": "png/第08章_Agentic工作流程-s019.png", "label": "第08章 Agentic工作流程 [019]"},{"file": "png/第08章_Agentic工作流程-s020.png", "label": "第08章 Agentic工作流程 [020]"},{"file": "png/第09章_MCP白話文-s001.png", "label": "第09章 MCP白話文 [001]"},{"file": "png/第09章_MCP白話文-s002.png", "label": "第09章 MCP白話文 [002]"},{"file": "png/第09章_MCP白話文-s003.png", "label": "第09章 MCP白話文 [003]"},{"file": "png/第09章_MCP白話文-s004.png", "label": "第09章 MCP白話文 [004]"},{"file": "png/第09章_MCP白話文-s005.png", "label": "第09章 MCP白話文 [005]"},{"file": "png/第09章_MCP白話文-s006.png", "label": "第09章 MCP白話文 [006]"},{"file": "png/第09章_MCP白話文-s007.png", "label": "第09章 MCP白話文 [007]"},{"file": "png/第09章_MCP白話文-s008.png", "label": "第09章 MCP白話文 [008]"},{"file": "png/第09章_MCP白話文-s009.png", "label": "第09章 MCP白話文 [009]"},{"file": "png/第09章_MCP白話文-s010.png", "label": "第09章 MCP白話文 [010]"},{"file": "png/第09章_MCP白話文-s011.png", "label": "第09章 MCP白話文 [011]"},{"file": "png/第09章_MCP白話文-s012.png", "label": "第09章 MCP白話文 [012]"},{"file": "png/第09章_MCP白話文-s013.png", "label": "第09章 MCP白話文 [013]"},{"file": "png/第09章_MCP白話文-s014.png", "label": "第09章 MCP白話文 [014]"},{"file": "png/第09章_MCP白話文-s015.png", "label": "第09章 MCP白話文 [015]"},{"file": "png/第09章_MCP白話文-s016.png", "label": "第09章 MCP白話文 [016]"},{"file": "png/第09章_MCP白話文-s017.png", "label": "第09章 MCP白話文 [017]"},{"file": "png/第09章_MCP白話文-s018.png", "label": "第09章 MCP白話文 [018]"},{"file": "png/第09章_MCP白話文-s019.png", "label": "第09章 MCP白話文 [019]"},{"file": "png/第09章_MCP白話文-s020.png", "label": "第09章 MCP白話文 [020]"},{"file": "png/第10章_CI_CD與DevOps-s001.png", "label": "第10章 CI_CD與DevOps [001]"},{"file": "png/第10章_CI_CD與DevOps-s002.png", "label": "第10章 CI_CD與DevOps [002]"},{"file": "png/第10章_CI_CD與DevOps-s003.png", "label": "第10章 CI_CD與DevOps [003]"},{"file": "png/第10章_CI_CD與DevOps-s004.png", "label": "第10章 CI_CD與DevOps [004]"},{"file": "png/第10章_CI_CD與DevOps-s005.png", "label": "第10章 CI_CD與DevOps [005]"},{"file": "png/第10章_CI_CD與DevOps-s006.png", "label": "第10章 CI_CD與DevOps [006]"},{"file": "png/第10章_CI_CD與DevOps-s007.png", "label": "第10章 CI_CD與DevOps [007]"},{"file": "png/第10章_CI_CD與DevOps-s008.png", "label": "第10章 CI_CD與DevOps [008]"},{"file": "png/第10章_CI_CD與DevOps-s009.png", "label": "第10章 CI_CD與DevOps [009]"},{"file": "png/第10章_CI_CD與DevOps-s010.png", "label": "第10章 CI_CD與DevOps [010]"},{"file": "png/第10章_CI_CD與DevOps-s011.png", "label": "第10章 CI_CD與DevOps [011]"},{"file": "png/第10章_CI_CD與DevOps-s012.png", "label": "第10章 CI_CD與DevOps [012]"},{"file": "png/第10章_CI_CD與DevOps-s013.png", "label": "第10章 CI_CD與DevOps [013]"},{"file": "png/第10章_CI_CD與DevOps-s014.png", "label": "第10章 CI_CD與DevOps [014]"},{"file": "png/第10章_CI_CD與DevOps-s015.png", "label": "第10章 CI_CD與DevOps [015]"},{"file": "png/第10章_CI_CD與DevOps-s016.png", "label": "第10章 CI_CD與DevOps [016]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s001.png", "label": "第11章 專案實作1_SaaS登陸頁 [001]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s002.png", "label": "第11章 專案實作1_SaaS登陸頁 [002]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s003.png", "label": "第11章 專案實作1_SaaS登陸頁 [003]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s004.png", "label": "第11章 專案實作1_SaaS登陸頁 [004]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s005.png", "label": "第11章 專案實作1_SaaS登陸頁 [005]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s006.png", "label": "第11章 專案實作1_SaaS登陸頁 [006]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s007.png", "label": "第11章 專案實作1_SaaS登陸頁 [007]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s008.png", "label": "第11章 專案實作1_SaaS登陸頁 [008]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s009.png", "label": "第11章 專案實作1_SaaS登陸頁 [009]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s010.png", "label": "第11章 專案實作1_SaaS登陸頁 [010]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s011.png", "label": "第11章 專案實作1_SaaS登陸頁 [011]"},{"file": "png/第11章_專案實作1_SaaS登陸頁-s012.png", "label": "第11章 專案實作1_SaaS登陸頁 [012]"},{"file": "png/第12章_專案實作2_自動化系統-s001.png", "label": "第12章 專案實作2_自動化系統 [001]"},{"file": "png/第12章_專案實作2_自動化系統-s002.png", "label": "第12章 專案實作2_自動化系統 [002]"},{"file": "png/第12章_專案實作2_自動化系統-s003.png", "label": "第12章 專案實作2_自動化系統 [003]"},{"file": "png/第12章_專案實作2_自動化系統-s004.png", "label": "第12章 專案實作2_自動化系統 [004]"},{"file": "png/第12章_專案實作2_自動化系統-s005.png", "label": "第12章 專案實作2_自動化系統 [005]"},{"file": "png/第12章_專案實作2_自動化系統-s006.png", "label": "第12章 專案實作2_自動化系統 [006]"},{"file": "png/第12章_專案實作2_自動化系統-s007.png", "label": "第12章 專案實作2_自動化系統 [007]"},{"file": "png/第12章_專案實作2_自動化系統-s008.png", "label": "第12章 專案實作2_自動化系統 [008]"},{"file": "png/第12章_專案實作2_自動化系統-s009.png", "label": "第12章 專案實作2_自動化系統 [009]"},{"file": "png/第12章_專案實作2_自動化系統-s010.png", "label": "第12章 專案實作2_自動化系統 [010]"},{"file": "png/第12章_專案實作2_自動化系統-s011.png", "label": "第12章 專案實作2_自動化系統 [011]"},{"file": "png/第12章_專案實作2_自動化系統-s012.png", "label": "第12章 專案實作2_自動化系統 [012]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s001.png", "label": "第13章 專案實作3_客戶端Web應用 [001]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s002.png", "label": "第13章 專案實作3_客戶端Web應用 [002]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s003.png", "label": "第13章 專案實作3_客戶端Web應用 [003]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s004.png", "label": "第13章 專案實作3_客戶端Web應用 [004]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s005.png", "label": "第13章 專案實作3_客戶端Web應用 [005]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s006.png", "label": "第13章 專案實作3_客戶端Web應用 [006]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s007.png", "label": "第13章 專案實作3_客戶端Web應用 [007]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s008.png", "label": "第13章 專案實作3_客戶端Web應用 [008]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s009.png", "label": "第13章 專案實作3_客戶端Web應用 [009]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s010.png", "label": "第13章 專案實作3_客戶端Web應用 [010]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s011.png", "label": "第13章 專案實作3_客戶端Web應用 [011]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s012.png", "label": "第13章 專案實作3_客戶端Web應用 [012]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s013.png", "label": "第13章 專案實作3_客戶端Web應用 [013]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s014.png", "label": "第13章 專案實作3_客戶端Web應用 [014]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s015.png", "label": "第13章 專案實作3_客戶端Web應用 [015]"},{"file": "png/第13章_專案實作3_客戶端Web應用-s016.png", "label": "第13章 專案實作3_客戶端Web應用 [016]"},{"file": "png/第14章_團隊中使用Claude Code-s001.png", "label": "第14章 團隊中使用Claude Code [001]"},{"file": "png/第14章_團隊中使用Claude Code-s002.png", "label": "第14章 團隊中使用Claude Code [002]"},{"file": "png/第14章_團隊中使用Claude Code-s003.png", "label": "第14章 團隊中使用Claude Code [003]"},{"file": "png/第14章_團隊中使用Claude Code-s004.png", "label": "第14章 團隊中使用Claude Code [004]"},{"file": "png/第14章_團隊中使用Claude Code-s005.png", "label": "第14章 團隊中使用Claude Code [005]"},{"file": "png/第14章_團隊中使用Claude Code-s006.png", "label": "第14章 團隊中使用Claude Code [006]"},{"file": "png/第14章_團隊中使用Claude Code-s007.png", "label": "第14章 團隊中使用Claude Code [007]"},{"file": "png/第14章_團隊中使用Claude Code-s008.png", "label": "第14章 團隊中使用Claude Code [008]"},{"file": "png/第14章_團隊中使用Claude Code-s009.png", "label": "第14章 團隊中使用Claude Code [009]"},{"file": "png/第14章_團隊中使用Claude Code-s010.png", "label": "第14章 團隊中使用Claude Code [010]"},{"file": "png/第14章_團隊中使用Claude Code-s011.png", "label": "第14章 團隊中使用Claude Code [011]"},{"file": "png/第14章_團隊中使用Claude Code-s012.png", "label": "第14章 團隊中使用Claude Code [012]"},{"file": "png/第14章_團隊中使用Claude Code-s013.png", "label": "第14章 團隊中使用Claude Code [013]"},{"file": "png/第14章_團隊中使用Claude Code-s014.png", "label": "第14章 團隊中使用Claude Code [014]"},{"file": "png/第14章_團隊中使用Claude Code-s015.png", "label": "第14章 團隊中使用Claude Code [015]"},{"file": "png/第14章_團隊中使用Claude Code-s016.png", "label": "第14章 團隊中使用Claude Code [016]"},{"file": "png/第14章_團隊中使用Claude Code-s017.png", "label": "第14章 團隊中使用Claude Code [017]"},{"file": "png/第14章_團隊中使用Claude Code-s018.png", "label": "第14章 團隊中使用Claude Code [018]"},{"file": "png/第15章_安全性與品質把關-s001.png", "label": "第15章 安全性與品質把關 [001]"},{"file": "png/第15章_安全性與品質把關-s002.png", "label": "第15章 安全性與品質把關 [002]"},{"file": "png/第15章_安全性與品質把關-s003.png", "label": "第15章 安全性與品質把關 [003]"},{"file": "png/第15章_安全性與品質把關-s004.png", "label": "第15章 安全性與品質把關 [004]"},{"file": "png/第15章_安全性與品質把關-s005.png", "label": "第15章 安全性與品質把關 [005]"},{"file": "png/第15章_安全性與品質把關-s006.png", "label": "第15章 安全性與品質把關 [006]"},{"file": "png/第15章_安全性與品質把關-s007.png", "label": "第15章 安全性與品質把關 [007]"},{"file": "png/第15章_安全性與品質把關-s008.png", "label": "第15章 安全性與品質把關 [008]"},{"file": "png/第15章_安全性與品質把關-s009.png", "label": "第15章 安全性與品質把關 [009]"},{"file": "png/第15章_安全性與品質把關-s010.png", "label": "第15章 安全性與品質把關 [010]"},{"file": "png/第15章_安全性與品質把關-s011.png", "label": "第15章 安全性與品質把關 [011]"},{"file": "png/第15章_安全性與品質把關-s012.png", "label": "第15章 安全性與品質把關 [012]"},{"file": "png/第15章_安全性與品質把關-s013.png", "label": "第15章 安全性與品質把關 [013]"},{"file": "png/第15章_安全性與品質把關-s014.png", "label": "第15章 安全性與品質把關 [014]"},{"file": "png/第15章_安全性與品質把關-s015.png", "label": "第15章 安全性與品質把關 [015]"},{"file": "png/第15章_安全性與品質把關-s016.png", "label": "第15章 安全性與品質把關 [016]"},{"file": "png/第15章_安全性與品質把關-s017.png", "label": "第15章 安全性與品質把關 [017]"},{"file": "png/附錄A_快速參考提示詞庫-s001.png", "label": "附錄A 快速參考提示詞庫 [001]"},{"file": "png/附錄A_快速參考提示詞庫-s002.png", "label": "附錄A 快速參考提示詞庫 [002]"},{"file": "png/附錄A_快速參考提示詞庫-s003.png", "label": "附錄A 快速參考提示詞庫 [003]"},{"file": "png/附錄A_快速參考提示詞庫-s004.png", "label": "附錄A 快速參考提示詞庫 [004]"},{"file": "png/附錄A_快速參考提示詞庫-s005.png", "label": "附錄A 快速參考提示詞庫 [005]"},{"file": "png/附錄A_快速參考提示詞庫-s006.png", "label": "附錄A 快速參考提示詞庫 [006]"},{"file": "png/附錄A_快速參考提示詞庫-s007.png", "label": "附錄A 快速參考提示詞庫 [007]"},{"file": "png/附錄A_快速參考提示詞庫-s008.png", "label": "附錄A 快速參考提示詞庫 [008]"},{"file": "png/附錄A_快速參考提示詞庫-s009.png", "label": "附錄A 快速參考提示詞庫 [009]"},{"file": "png/附錄A_快速參考提示詞庫-s010.png", "label": "附錄A 快速參考提示詞庫 [010]"},{"file": "png/附錄A_快速參考提示詞庫-s011.png", "label": "附錄A 快速參考提示詞庫 [011]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s001.png", "label": "附錄B 團隊CLAUDE.md範本 [001]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s002.png", "label": "附錄B 團隊CLAUDE.md範本 [002]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s003.png", "label": "附錄B 團隊CLAUDE.md範本 [003]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s004.png", "label": "附錄B 團隊CLAUDE.md範本 [004]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s005.png", "label": "附錄B 團隊CLAUDE.md範本 [005]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s006.png", "label": "附錄B 團隊CLAUDE.md範本 [006]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s007.png", "label": "附錄B 團隊CLAUDE.md範本 [007]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s008.png", "label": "附錄B 團隊CLAUDE.md範本 [008]"},{"file": "png/附錄B_團隊CLAUDE.md範本-s009.png", "label": "附錄B 團隊CLAUDE.md範本 [009]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s001.png", "label": "附錄C AI程式碼資安檢查清單 [001]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s002.png", "label": "附錄C AI程式碼資安檢查清單 [002]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s003.png", "label": "附錄C AI程式碼資安檢查清單 [003]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s004.png", "label": "附錄C AI程式碼資安檢查清單 [004]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s005.png", "label": "附錄C AI程式碼資安檢查清單 [005]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s006.png", "label": "附錄C AI程式碼資安檢查清單 [006]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s007.png", "label": "附錄C AI程式碼資安檢查清單 [007]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s008.png", "label": "附錄C AI程式碼資安檢查清單 [008]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s009.png", "label": "附錄C AI程式碼資安檢查清單 [009]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s010.png", "label": "附錄C AI程式碼資安檢查清單 [010]"},{"file": "png/附錄C_AI程式碼資安檢查清單-s011.png", "label": "附錄C AI程式碼資安檢查清單 [011]"}];
+const CHAPTERS=["第01章 從聊天機器人到開發夥伴","第02章 真正有效的提示詞技巧","第03章 建立專業開發環境","第04章 生產級程式碼","第05章 快速除錯","第06章 無痛測試","第07章 無懼重構","第08章 Agentic工作流程","第09章 MCP白話文","第10章 CI_CD與DevOps","第11章 專案實作1_SaaS登陸頁","第12章 專案實作2_自動化系統","第13章 專案實作3_客戶端Web應用","第14章 團隊中使用Claude Code","第15章 安全性與品質把關","附錄A 快速參考提示詞庫","附錄B 團隊CLAUDE.md範本","附錄C AI程式碼資安檢查清單"];
+const CHAPTER_START={"第01章 從聊天機器人到開發夥伴":0,"第02章 真正有效的提示詞技巧":8,"第03章 建立專業開發環境":26,"第04章 生產級程式碼":36,"第05章 快速除錯":48,"第06章 無痛測試":66,"第07章 無懼重構":83,"第08章 Agentic工作流程":104,"第09章 MCP白話文":124,"第10章 CI_CD與DevOps":144,"第11章 專案實作1_SaaS登陸頁":160,"第12章 專案實作2_自動化系統":172,"第13章 專案實作3_客戶端Web應用":184,"第14章 團隊中使用Claude Code":200,"第15章 安全性與品質把關":218,"附錄A 快速參考提示詞庫":235,"附錄B 團隊CLAUDE.md範本":246,"附錄C AI程式碼資安檢查清單":255};
+let cur=0,scale=1,tx=0,ty=0,dragging=false,startX,startY,startTx,startTy;
+const viewer=document.getElementById("viewer");
+const img=document.getElementById("img");
+const thumbsEl=document.getElementById("thumbs");
+const badge=document.getElementById("zoom-badge");
+const info=document.getElementById("slide-info");
+const chList=document.getElementById("ch-list");
+CHAPTERS.forEach((ch,i)=>{
+  const btn=document.createElement("button");
+  btn.className="ch-btn";btn.textContent=ch;
+  btn.onclick=()=>goTo(CHAPTER_START[ch]);
+  chList.appendChild(btn);
+});
+IMAGES.forEach((im,i)=>{
+  const t=document.createElement("img");
+  t.className="thumb";t.src=im.file;t.title=im.label;
+  t.onclick=()=>goTo(i);thumbsEl.appendChild(t);
+});
+function applyTransform(){
+  img.style.transform="matrix("+scale+",0,0,"+scale+","+tx+","+ty+")";
+  badge.textContent=Math.round(scale*100)+"%";
+}
+function loadImage(){
+  img.onload=()=>{
+    const PAD=24;
+    scale=Math.min((viewer.clientWidth-PAD*2)/img.naturalWidth,(viewer.clientHeight-PAD*2)/img.naturalHeight);
+    tx=(viewer.clientWidth-img.naturalWidth*scale)/2;
+    ty=(viewer.clientHeight-img.naturalHeight*scale)/2;
+    applyTransform();
+  };
+  img.src=IMAGES[cur].file;
+}
+function updateUI(){
+  info.textContent=(cur+1)+" / 266 — "+IMAGES[cur].label;
+  document.querySelectorAll(".thumb").forEach((t,i)=>t.classList.toggle("active",i===cur));
+  const t=thumbsEl.children[cur];if(t)t.scrollIntoView({inline:"center",block:"nearest"});
+  document.querySelectorAll(".ch-btn").forEach((btn,i)=>{
+    const cs=CHAPTER_START[CHAPTERS[i]];
+    const ce=i+1<CHAPTERS.length?CHAPTER_START[CHAPTERS[i+1]]:IMAGES.length;
+    btn.classList.toggle("active",cur>=cs&&cur<ce);
+  });
+}
+function goTo(n){if(n<0)n=0;if(n>=IMAGES.length)n=IMAGES.length-1;cur=n;loadImage();updateUI();}
+viewer.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const f=e.deltaY<0?1.13:1/1.13;
+  const ns=Math.min(Math.max(scale*f,0.1),25);
+  const vr=viewer.getBoundingClientRect();
+  const cx=e.clientX-vr.left,cy=e.clientY-vr.top;
+  tx=cx-(cx-tx)*(ns/scale);ty=cy-(cy-ty)*(ns/scale);scale=ns;applyTransform();
+},{passive:false});
+viewer.addEventListener("mousedown",e=>{dragging=true;viewer.classList.add("dragging");startX=e.clientX;startY=e.clientY;startTx=tx;startTy=ty;});
+document.addEventListener("mousemove",e=>{if(!dragging)return;tx=startTx+(e.clientX-startX);ty=startTy+(e.clientY-startY);applyTransform();});
+document.addEventListener("mouseup",()=>{dragging=false;viewer.classList.remove("dragging");});
+viewer.addEventListener("dblclick",()=>loadImage());
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key==="ArrowDown")goTo(cur+1);
+  if(e.key==="ArrowLeft"||e.key==="ArrowUp")goTo(cur-1);
+});
+document.getElementById("prev").onclick=()=>goTo(cur-1);
+document.getElementById("next").onclick=()=>goTo(cur+1);
+document.getElementById("fit-btn").onclick=()=>loadImage();
+let autoTimer=null,autoMs=3000;
+const autoBtn=document.getElementById("auto-btn");
+const autoSpeedBtn=document.getElementById("auto-speed-btn");
+const speedMenu=document.getElementById("speed-menu");
+function stopAutoPlay(){
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+  autoBtn.textContent="▶ 自動播放";
+  autoBtn.classList.remove("playing");
+  autoSpeedBtn.classList.remove("playing");
+}
+function startAutoPlay(){
+  stopAutoPlay();
+  autoTimer=setInterval(()=>goTo(cur+1>=IMAGES.length?0:cur+1),autoMs);
+  autoBtn.textContent="⏸ 自動播放";
+  autoBtn.classList.add("playing");
+  autoSpeedBtn.classList.add("playing");
+}
+autoBtn.onclick=()=>{autoTimer?stopAutoPlay():startAutoPlay();};
+autoSpeedBtn.onclick=(e)=>{e.stopPropagation();speedMenu.classList.toggle("open");};
+document.addEventListener("click",()=>speedMenu.classList.remove("open"));
+document.querySelectorAll(".speed-opt").forEach(btn=>{
+  btn.onclick=(e)=>{
+    e.stopPropagation();
+    autoMs=+btn.dataset.ms;
+    document.querySelectorAll(".speed-opt").forEach(b=>b.classList.remove("selected"));
+    btn.classList.add("selected");
+    speedMenu.classList.remove("open");
+    if(autoTimer)startAutoPlay();
+  };
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")stopAutoPlay();},true);
+goTo(0);
+</script>
+</body>
+</html>
