@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 03：TDD 實戰</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 03：TDD 實戰 — Email 驗證器</h1>
+
+<h2>階段一：Red（先寫測試，全部 FAIL）</h2>
+
+<pre>import pytest
+from email_validator import is_valid_email
+
+def test_valid_email_returns_true():
+    assert is_valid_email("user@example.com") is True
+
+def test_missing_at_symbol_returns_false():
+    assert is_valid_email("userexample.com") is False
+
+def test_multiple_at_symbols_returns_false():
+    assert is_valid_email("user@@example.com") is False
+
+def test_empty_string_returns_false():
+    assert is_valid_email("") is False
+
+def test_plus_tag_in_local_part_is_valid():
+    assert is_valid_email("user+tag@example.com") is True</pre>
+
+<hr/>
+
+<h2>階段二：Green（最小實作，5 個測試全通過）</h2>
+
+<pre>def is_valid_email(email: str) -> bool:
+    if not email:
+        return False
+    parts = email.split("@")
+    if len(parts) != 2:
+        return False
+    local, domain = parts
+    return bool(local) and bool(domain)</pre>
+
+<hr/>
+
+<h2>階段三：Refactor（改善品質）</h2>
+
+<pre>def is_valid_email(email: str) -> bool:
+    """驗證 email 格式是否合法。
+
+    合法條件：恰好一個 @，@ 前後都不為空。
+    注意：不驗證 domain 格式（.com 等），只做基礎結構檢查。
+    """
+    if not email:
+        return False
+    if email.count("@") != 1:
+        return False
+    local, domain = email.split("@")
+    return bool(local) and bool(domain)</pre>
+
+<p>改動：<code>len(split()) != 2</code> → <code>count("@") != 1</code>，意圖更直白。</p>
+
+<hr/>
+
+<h2>TDD 反思</h2>
+
+<table>
+  <tr><th>問題</th><th>答案</th></tr>
+  <tr><td>最困難的階段</td><td>Red 階段：在沒有實作時設計測試，等於強迫先想清楚邊界（+tag 合不合法？）</td></tr>
+  <tr><td>Refactor 改了什麼</td><td>count("@") 取代 split 長度檢查，更直白。先實作後不會自然做這種改善。</td></tr>
+</table>
+
+<h2>TDD 適用情境</h2>
+
+<table>
+  <tr><th>適合</th><th>不適合</th></tr>
+  <tr><td>邏輯邊界明確（驗證器、計算器）</td><td>探索性功能（不知道輸出長什麼樣）</td></tr>
+  <tr><td>業務規則複雜、易錯</td><td>UI 互動、視覺設計</td></tr>
+  <tr><td>需長期維護的核心模組</td><td>一次性腳本、快速 prototype</td></tr>
+</table>
+
+<div class="insight">
+<p><strong>TDD 核心價值：</strong>不是讓你寫更多測試，而是讓「設計」發生在「實作」之前。先寫測試的過程，就是在思考「這個函式應該有什麼行為」。</p>
+</div>
+
+</body>
+</html>

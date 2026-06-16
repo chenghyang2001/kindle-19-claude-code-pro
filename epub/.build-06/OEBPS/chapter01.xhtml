@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 01：三層測試實戰</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 01：三層測試實戰</h1>
+
+<h2>目標函式</h2>
+
+<pre>def calculate_daily_avg(readings: list[float]) -> float:
+    """計算有效 PM2.5 讀數的日均值。998 是感測器故障碼，需排除。"""
+    valid = [r for r in readings if 0 &lt;= r &lt;= 500]
+    return round(sum(valid) / len(valid), 2) if valid else 0.0</pre>
+
+<h2>三個基礎測試</h2>
+
+<pre>import pytest
+from calculator import calculate_daily_avg
+
+def test_returns_correct_average_for_valid_readings():
+    # Arrange
+    readings = [12.5, 35.0, 78.3, 120.0]
+
+    # Act
+    result = calculate_daily_avg(readings)
+
+    # Assert
+    assert result == 61.45
+
+def test_returns_zero_when_all_readings_are_fault_code():
+    # Arrange
+    readings = [998, 998, 998]
+
+    # Act
+    result = calculate_daily_avg(readings)
+
+    # Assert
+    assert result == 0.0
+
+def test_returns_zero_for_empty_list():
+    # Arrange
+    readings = []
+
+    # Act
+    result = calculate_daily_avg(readings)
+
+    # Assert
+    assert result == 0.0</pre>
+
+<h2>三個邊界值測試</h2>
+
+<pre>def test_excludes_fault_code_from_mixed_readings():
+    readings = [50.0, 998, 100.0, 998]
+    result = calculate_daily_avg(readings)
+    assert result == 75.0  # 只算 50.0 和 100.0
+
+def test_returns_correct_average_for_single_valid_reading():
+    readings = [42.5]
+    result = calculate_daily_avg(readings)
+    assert result == 42.5
+
+def test_includes_boundary_values_zero_and_five_hundred():
+    readings = [0.0, 500.0]
+    result = calculate_daily_avg(readings)
+    assert result == 250.0  # 0 和 500 都是有效值</pre>
+
+<div class="insight">
+<p><strong>命名原則：</strong>測試函式名稱用 <code>test_&lt;場景描述&gt;</code>，描述「什麼情況下發生什麼」，不是「呼叫什麼函式」。<code>test_returns_zero_when_all_readings_are_fault_code</code> 比 <code>test_calculate_daily_avg</code> 有用 10 倍。</p>
+</div>
+
+</body>
+</html>

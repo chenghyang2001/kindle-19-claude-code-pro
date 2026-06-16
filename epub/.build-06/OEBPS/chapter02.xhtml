@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 02：Claude Code 生成測試</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 02：Claude Code 生成測試</h1>
+
+<h2>生成測試提示詞模板</h2>
+
+<pre>你是一位 Python 測試專家，請為以下函式生成完整的 pytest 測試套件。
+
+目標函式：
+[貼入函式程式碼]
+
+生成規則（必須全部遵守）：
+1. 至少 1 個 happy path：標準正常輸入 → 驗證回傳值正確
+2. 至少 2 個 edge case：空值 / 邊界值（最小、最大）
+3. 至少 1 個 error case：非法輸入應拋出特定例外類型
+4. 命名：test_[場景描述]（描述「什麼情況下發生什麼」）
+5. 每個測試只測一件事，結構為 Arrange / Act / Assert
+
+外部依賴處理：
+- 資料庫 / API 一律用 mocker.patch() mock 掉
+- mock 回傳值要模擬真實格式，不能用 None
+
+輸出：完整可執行的 pytest 程式碼，每個測試前加一行說明註解。</pre>
+
+<hr/>
+
+<h2>生成品質評估</h2>
+
+<table>
+  <tr><th>維度</th><th>分數</th><th>說明</th></tr>
+  <tr><td>覆蓋全面性</td><td>4/5</td><td>主要路徑涵蓋；負數輸入常被忽略</td></tr>
+  <tr><td>可直接執行</td><td>5/5</td><td>無需修改，import 路徑正確</td></tr>
+  <tr><td>命名清晰度</td><td>5/5</td><td>函式名稱完整描述場景</td></tr>
+  <tr><td>真實驗證行為</td><td>4/5</td><td>精確；浮點可改用 pytest.approx</td></tr>
+</table>
+
+<h2>外部依賴的常見 Mock 問題</h2>
+
+<table>
+  <tr><th>錯誤</th><th>後果</th><th>引導方式</th></tr>
+  <tr><td>忘記 mock</td><td>測試環境無連線直接失敗</td><td>提示詞明確指定「一律 mock」</td></tr>
+  <tr><td>mock 回 None</td><td>函式跑過但沒測到真實邏輯</td><td>指定「mock 回傳真實格式資料」</td></tr>
+</table>
+
+<div class="insight">
+<p><strong>關鍵洞察：</strong>Claude 生成的測試 90% 都能用，但 10% 的 edge case（負數、極大值、特殊字元）需要人工補充。與其讓 Claude 生成「完美測試」，不如讓它生成 80% 再人工 review 補充。</p>
+</div>
+
+</body>
+</html>
