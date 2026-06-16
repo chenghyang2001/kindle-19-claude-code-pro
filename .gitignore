@@ -19,3 +19,9 @@ __pycache__/
 # Misc
 *.stackdump
 bash.exe.stackdump
+
+# Claude Code 自動生成的 session 狀態（本機用，不需同步）
+.claude/session-state.md
+
+# 投影片圖片暫存（大型二進位，不需版控）
+chapter-pptx/ch03-slides-tmp/
