@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 03：大規模重構計畫</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 03：大規模重構計畫</h1>
+
+<h2>程式碼掃描結果（email-automation-演練/）</h2>
+
+<table>
+  <tr><th>檔案</th><th>函式</th><th>行數</th></tr>
+  <tr><td>run_briefing.py</td><td>main</td><td>106 行</td></tr>
+  <tr><td>run_briefing.py</td><td>_fetch_emails_today</td><td>70 行</td></tr>
+  <tr><td>notion_creator.py</td><td>_create_via_subprocess</td><td>70 行</td></tr>
+  <tr><td>telegram_briefer.py</td><td>format_briefing</td><td>67 行</td></tr>
+  <tr><td>summarizer.py</td><td>_parse_deadline</td><td>57 行</td></tr>
+  <tr><td>notion_creator.py</td><td>_create_via_api</td><td>53 行</td></tr>
+  <tr><td>gmail_fetcher.py</td><td>fetch_emails_today</td><td>50 行</td></tr>
+</table>
+
+<p><strong>重複邏輯：</strong></p>
+<ul>
+  <li>notion_creator：API / subprocess 兩個實作建構相同 payload</li>
+  <li>run_briefing._fetch_emails_today 與 gmail_fetcher.fetch_emails_today 功能重複</li>
+  <li>summarizer 的雙實作 pattern 與 notion_creator 如出一轍</li>
+</ul>
+
+<hr/>
+
+<h2>優先級評估</h2>
+
+<table>
+  <tr><th>問題</th><th>影響</th><th>難度</th><th>得分</th></tr>
+  <tr><td>notion_creator 雙實作重複</td><td>4</td><td>2</td><td>2.00</td></tr>
+  <tr><td>run_briefing 重複 fetch 邏輯</td><td>4</td><td>2</td><td>2.00</td></tr>
+  <tr><td>run_briefing.main 106 行</td><td>5</td><td>3</td><td>1.67</td></tr>
+  <tr><td>format_briefing 格式與發送混雜</td><td>3</td><td>2</td><td>1.50</td></tr>
+  <tr><td>_parse_deadline 57 行</td><td>3</td><td>3</td><td>1.00</td></tr>
+</table>
+
+<p>優先級得分 = 影響程度 / 重構難度（越高越值得優先）</p>
+
+<hr/>
+
+<h2>重構執行計畫（前 3）</h2>
+
+<h3>#1：消除 notion_creator 雙實作重複（得分 2.00）</h3>
+<ul>
+  <li>手法：Extract 共用 payload 建構為 _build_notion_payload()</li>
+  <li>先加測試：mock API / subprocess 回傳各一個</li>
+  <li>預估時間：30 分鐘</li>
+  <li>預期改善：減少 40 行重複碼，改 payload 格式只需改一處</li>
+</ul>
+
+<h3>#2：刪除重複 fetch 邏輯（得分 2.00）</h3>
+<ul>
+  <li>手法：Remove Duplicate，直接呼叫 gmail_fetcher</li>
+  <li>先加測試：確認兩者回傳格式一致</li>
+  <li>預估時間：20 分鐘</li>
+  <li>預期改善：修 Gmail bug 只需改一個地方</li>
+</ul>
+
+<h3>#3：拆解 run_briefing.main 106 行（得分 1.67）</h3>
+<ul>
+  <li>手法：Extract Function → fetch_stage / filter_stage / summarize_stage / notify_stage</li>
+  <li>先加測試：整合測試覆蓋完整 pipeline</li>
+  <li>預估時間：60 分鐘</li>
+  <li>預期改善：每個 stage 可獨立測試、替換</li>
+</ul>
+
+<hr/>
+
+<h2>風險評估</h2>
+
+<div class="danger">
+<p><strong>最危險：</strong>拆解 run_briefing.main。原始碼有隱性狀態共享（cache、errors 清單在 main 內部流轉）。提取子函式時若漏傳這些狀態，會靜默失敗（不拋例外，只是不 cache）。</p>
+<p><strong>降低方式：</strong>先加端對端測試涵蓋 cache 行為，每提取一個 stage 就立刻跑全測試，不要一次全部提取。</p>
+</div>
+
+</body>
+</html>

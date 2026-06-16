@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 01：識別程式碼異味</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 01：識別程式碼異味</h1>
+
+<h2>異味掃描結果</h2>
+
+<table>
+  <tr><th>異味類型</th><th>具體問題</th><th>影響程度</th></tr>
+  <tr><td>命名含糊</td><td>函式 process、參數 d/t/r 完全不說明意圖</td><td>高</td></tr>
+  <tr><td>巢狀過深</td><td>if 巢狀達 5 層，閱讀需追蹤多層縮排</td><td>高</td></tr>
+  <tr><td>函式職責混雜</td><td>同一函式既過濾、又計算均值、又決定回傳格式</td><td>高</td></tr>
+  <tr><td>手動迴圈</td><td>for i in range(len(d)) 應改 for item in d</td><td>中</td></tr>
+  <tr><td>手動累加</td><td>total = 0; for x: total += x 應改 sum()</td><td>中</td></tr>
+  <tr><td>冗餘比較</td><td>if r == True 應寫 if r；!= None 應寫 is not None</td><td>低</td></tr>
+  <tr><td>空的 else/pass</td><td>else: pass 完全無意義，增加閱讀雜訊</td><td>低</td></tr>
+</table>
+
+<h2>優先排序</h2>
+
+<table>
+  <tr><th>順序</th><th>問題</th><th>理由</th></tr>
+  <tr><td>1（最值得先做）</td><td>命名</td><td>成本最低，立刻讓整個函式可讀，後續重構都受益</td></tr>
+  <tr><td>2（最簡單）</td><td>移除 else:pass 和 == True</td><td>一行搞定，完全不改邏輯</td></tr>
+  <tr><td>3（最危險）</td><td>拆分職責</td><td>邊界行為（空清單回 0 vs 回空 list）容易在拆解時漏掉</td></tr>
+</table>
+
+<div class="danger">
+<p><strong>重構鐵律：</strong>先識別異味、排優先級，不要看到問題就立刻動手。最危險的改動必須先有測試網才能碰。</p>
+</div>
+
+</body>
+</html>

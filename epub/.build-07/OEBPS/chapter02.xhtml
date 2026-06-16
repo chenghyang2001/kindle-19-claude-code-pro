@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 02：安全重構六步驟</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 02：安全重構六步驟</h1>
+
+<h2>步驟一：測試網</h2>
+
+<pre>import pytest
+from sensor import process
+
+def test_pm25_filters_valid_readings():
+    assert process([10.0, 50.0, 998, 600.0], "pm25") == 30.0
+
+def test_pm25_returns_zero_for_empty_valid():
+    assert process([998, 998], "pm25") == 0
+
+def test_pm25_returns_list_when_r_false():
+    assert process([10.0, 998, 50.0], "pm25", r=False) == [10.0, 50.0]
+
+def test_temperature_filters_valid_range():
+    assert process([-50.0, 25.0, 85.0, 100.0], "temp") == 55.0</pre>
+
+<hr/>
+
+<h2>重構後完整程式碼</h2>
+
+<pre>def filter_pm25(readings: list) -> list:
+    """過濾 PM2.5 有效讀數（0-500，排除 998 故障碼）。"""
+    return [r for r in readings if r is not None and 0 &lt;= r &lt;= 500 and r != 998]
+
+
+def filter_temperature(readings: list) -> list:
+    """過濾溫度有效讀數（-40 到 85 度）。"""
+    return [r for r in readings if r is not None and -40 &lt;= r &lt;= 85]
+
+
+def aggregate_sensor_readings(
+    readings: list,
+    sensor_type: str,
+    return_average: bool = True
+):
+    """過濾感測器讀數並計算均值或回傳清單。"""
+    if sensor_type == "pm25":
+        valid = filter_pm25(readings)
+    elif sensor_type == "temp":
+        valid = filter_temperature(readings)
+    else:
+        valid = [r for r in readings if r is not None]
+
+    if return_average:
+        return round(sum(valid) / len(valid), 2) if valid else 0
+    return valid</pre>
+
+<h2>每步驟說明</h2>
+
+<table>
+  <tr><th>步驟</th><th>改動</th><th>測試結果</th></tr>
+  <tr><td>1</td><td>加測試網（4 個）</td><td>全 PASS（驗證原始行為正確）</td></tr>
+  <tr><td>2</td><td>Rename：d/t/r → readings/sensor_type/return_average</td><td>全 PASS</td></tr>
+  <tr><td>3</td><td>Extract：抽出 filter_pm25 / filter_temperature</td><td>全 PASS</td></tr>
+  <tr><td>4</td><td>for range(len) → list comprehension</td><td>全 PASS</td></tr>
+  <tr><td>5</td><td>手動累加 → sum()</td><td>全 PASS</td></tr>
+</table>
+
+<div class="insight">
+<p><strong>Extract Function 的價值：</strong>提取後，filter_pm25 可以獨立測試。<code>assert filter_pm25([10, 998]) == [10]</code> 比測整個 process 更簡單、意圖更清楚。</p>
+</div>
+
+</body>
+</html>
