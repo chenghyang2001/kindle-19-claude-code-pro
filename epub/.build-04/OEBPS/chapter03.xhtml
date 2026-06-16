@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 03：自動化品質守門</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 03：自動化品質守門</h1>
+
+<h2>PreToolUse Hook 設計</h2>
+
+<p>在 Claude Code 寫入 .py 前攔截，掃描即將寫入的內容：</p>
+
+<pre>rules = [
+    (r'execute\s*\(\s*f["\'']', 'SQL 注入風險',
+     '改用參數化查詢：cursor.execute(sql, (val,))'),
+    (r'password\s*=\s*["\''][^"\'\']+["\'']', '機密硬編碼',
+     '改用 os.environ["DB_PASS"]'),
+    (r'(secret|api_key|token)\s*=\s*["\''][^"\'\']+["\'']', '機密硬編碼',
+     '改用 os.environ["KEY_NAME"]'),
+]
+# 發現問題 → sys.exit(2) → Claude Code 停止 Write</pre>
+
+<p><strong>關鍵設計決策：</strong></p>
+<ul>
+  <li><code>sys.exit(2)</code> → exit code ≠ 0，Claude Code 停止 Write</li>
+  <li>只掃 <code>.py</code>，其他副檔名直接 <code>sys.exit(0)</code> 放行</li>
+  <li>掃的是即將寫入的 content（PreToolUse），不是硬碟上的舊檔案</li>
+</ul>
+
+<hr/>
+
+<h2>發現問題時的輸出格式</h2>
+
+<pre>[QUALITY GATE] 發現問題，建議修正後再寫入：
+  行 8 [SQL 注入風險]
+    程式碼：cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+    修正：改用參數化查詢：cursor.execute(sql, (val,))
+
+  行 12 [機密硬編碼]
+    程式碼：password='supersecret123'
+    修正：改用 os.environ["DB_PASS"]
+
+⛔ 寫入已中止。修正上述問題後重新產生程式碼。</pre>
+
+<hr/>
+
+<h2>quality-rules.md（5 條規則）</h2>
+
+<table>
+  <tr><th>#</th><th>Pattern</th><th>危險原因</th><th>正確替代</th></tr>
+  <tr><td>1</td><td>execute\s*\(\s*f["']</td><td>f-string 拼接 SQL → 注入漏洞</td><td>cursor.execute(sql, (val,))</td></tr>
+  <tr><td>2</td><td>password\s*=\s*["'][^"']+["']</td><td>密碼硬編碼 → git 永久洩漏</td><td>os.environ["DB_PASS"]</td></tr>
+  <tr><td>3</td><td>(secret|api_key|token)\s*=\s*["']...</td><td>機密寫死 → git 永久洩漏</td><td>os.environ["SECRET_KEY"]</td></tr>
+  <tr><td>4</td><td>except:\s*$</td><td>裸 except 吞掉所有例外</td><td>except pymysql.Error as e:</td></tr>
+  <tr><td>5</td><td>subprocess.*shell=True</td><td>shell injection 風險</td><td>subprocess.run(["cmd", arg])</td></tr>
+</table>
+
+<hr/>
+
+<h2>三層品質防線</h2>
+
+<table>
+  <tr><th>層</th><th>工具</th><th>觸發時機</th><th>特點</th></tr>
+  <tr><td>1</td><td>PreToolUse hook（本練習）</td><td>寫入前</td><td>最早攔截，成本最低</td></tr>
+  <tr><td>2</td><td>PostToolUse hook（Lesson 03）</td><td>寫入後</td><td>格式化，不阻擋</td></tr>
+  <tr><td>3</td><td>pre-commit / CI</td><td>commit / push 後</td><td>全域保障，最後防線</td></tr>
+</table>
+
+<div class="insight">
+<p><strong>核心洞察：</strong>PreToolUse 比 PostToolUse 更好 — 事前阻止比事後補救便宜 10 倍。工具能做的事就不要靠人的記憶，這是生產級工程與學生作業的根本差異。</p>
+</div>
+
+</body>
+</html>

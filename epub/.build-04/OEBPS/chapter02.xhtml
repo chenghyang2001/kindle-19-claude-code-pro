@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 02：程式碼品質 Checklist</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 02：程式碼品質 Checklist 實戰</h1>
+
+<h2>10 項品質 Checklist（按危險程度排序）</h2>
+
+<table>
+  <tr><th>優先</th><th>項目</th><th>如何驗證</th><th>違反後果</th></tr>
+  <tr><td>🔴 1</td><td>所有 SQL 用參數化查詢</td><td>grep execute(f" 應零結果</td><td>SQL 注入，DB 被讀取/刪除</td></tr>
+  <tr><td>🔴 2</td><td>API Key / 密碼從環境變數讀取</td><td>grep password= 只允許 os.environ</td><td>commit 後永久洩漏</td></tr>
+  <tr><td>🔴 3</td><td>所有外部 I/O 有 try/except</td><td>找每個 connect() / requests.get() 確認有 try</td><td>外部失敗讓程式 crash</td></tr>
+  <tr><td>🟠 4</td><td>DB 連線必定關閉</td><td>找每個 conn= 確認有 finally 或 with</td><td>連線池耗盡，服務掛掉</td></tr>
+  <tr><td>🟠 5</td><td>使用者輸入有驗證</td><td>看函式入口的型別/範圍/長度檢查</td><td>崩潰或被利用做 DoS</td></tr>
+  <tr><td>🟠 6</td><td>敏感資訊不寫進 log</td><td>搜尋 logger 輸出無 password/token 欄位</td><td>log 系統洩漏機密</td></tr>
+  <tr><td>🟡 7</td><td>函式有明確回傳型別標注</td><td>看函式簽名有無 -> dict | None 等</td><td>呼叫方不知要判斷 None</td></tr>
+  <tr><td>🟡 8</td><td>不用裸 except:</td><td>grep "except:" 應零結果</td><td>吞掉 KeyboardInterrupt 等</td></tr>
+  <tr><td>🟡 9</td><td>迴圈內不重複建立 DB 連線</td><td>看迴圈裡有無 connect()</td><td>N+1 連線，效能惡化</td></tr>
+  <tr><td>🟢 10</td><td>有冒煙測試</td><td>python file.py 直接跑一次</td><td>基本功能無任何驗證</td></tr>
+</table>
+
+<hr/>
+
+<h2>套用到 fetch_user 原始版本</h2>
+
+<table>
+  <tr><th>#</th><th>項目</th><th>結果</th><th>說明</th></tr>
+  <tr><td>1</td><td>參數化查詢</td><td>❌</td><td>f-string 拼接 SQL</td></tr>
+  <tr><td>2</td><td>環境變數</td><td>❌</td><td>password='1234' 硬編碼</td></tr>
+  <tr><td>3</td><td>try/except</td><td>❌</td><td>完全沒有</td></tr>
+  <tr><td>4</td><td>連線關閉</td><td>❌</td><td>無 finally，無 with</td></tr>
+  <tr><td>5</td><td>輸入驗證</td><td>❌</td><td>user_id 未驗證型別</td></tr>
+  <tr><td>6</td><td>log 無機密</td><td>✅ 不適用</td><td>完全沒有 log</td></tr>
+  <tr><td>7</td><td>回傳型別</td><td>❌</td><td>無型別標注</td></tr>
+  <tr><td>8</td><td>具體例外</td><td>❌</td><td>沒有任何 except</td></tr>
+  <tr><td>9</td><td>迴圈連線</td><td>✅</td><td>只建一次連線</td></tr>
+  <tr><td>10</td><td>冒煙測試</td><td>❌</td><td>無任何測試</td></tr>
+</table>
+
+<hr/>
+
+<h2>讓 Checklist「不得不做」</h2>
+
+<table>
+  <tr><th>層級</th><th>工具</th><th>觸發時機</th></tr>
+  <tr><td>本機即時</td><td>Claude Code PostToolUse hook → ruff / bandit</td><td>每次 Write .py 自動掃</td></tr>
+  <tr><td>commit 前</td><td>pre-commit hook → bandit -r .</td><td>git commit 時強制通過</td></tr>
+  <tr><td>CI 遠端</td><td>GitHub Actions → bandit + pytest</td><td>push 後自動跑，失敗不讓 merge</td></tr>
+</table>
+
+<div class="insight">
+<p><strong>結論：</strong>Checklist 是「知道要查什麼」，hook + CI 才是「保證有查」。人的記憶不可靠，exit code 永遠可靠。</p>
+</div>
+
+</body>
+</html>

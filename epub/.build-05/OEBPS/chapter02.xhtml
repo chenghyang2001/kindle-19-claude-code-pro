@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 02：系統化 Debug 流程</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 02：系統化 Debug 流程</h1>
+
+<p><strong>情境：</strong>Flask API 在某些條件下回傳 500，log 只有「Internal Server Error」，沒有詳細訊息。</p>
+
+<h2>API 500 系統化 Debug Checklist</h2>
+
+<table>
+  <tr><th>#</th><th>步驟</th><th>如何執行</th><th>有發現時</th></tr>
+  <tr><td>1</td><td>重現問題</td><td>curl/Postman 用相同參數打 API，確認可穩定重現</td><td>記錄最小觸發請求</td></tr>
+  <tr><td>2</td><td>看完整 server log</td><td>grep -A 10 "500" app.log</td><td>找到 traceback → 跳步驟 5</td></tr>
+  <tr><td>3</td><td>加強 logging</td><td>PROPAGATE_EXCEPTIONS = True；開發加 DEBUG = True</td><td>看到真正的 exception</td></tr>
+  <tr><td>4</td><td>縮小觸發範圍</td><td>逐一移除請求參數，二分搜尋</td><td>找最小觸發條件</td></tr>
+  <tr><td>5</td><td>讀 traceback 找根因</td><td>找最深那行 File/Line</td><td>去對應位置加 breakpoint</td></tr>
+  <tr><td>6</td><td>本地 breakpoint 除錯</td><td>import pdb; pdb.set_trace()</td><td>觀察實際變數值</td></tr>
+  <tr><td>7</td><td>查資料庫/外部服務</td><td>直接打 DB query 或呼叫外部 API</td><td>依賴項問題 → 加 timeout + fallback</td></tr>
+  <tr><td>8</td><td>查環境差異</td><td>比較 pip freeze、環境變數、config</td><td>找到差異 → 統一設定</td></tr>
+</table>
+
+<hr/>
+
+<h2>Flask Logging Decorator</h2>
+
+<pre>import logging
+import time
+import traceback
+from functools import wraps
+from flask import request
+
+logger = logging.getLogger(__name__)
+
+def log_request(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        try:
+            response = f(*args, **kwargs)
+            elapsed = (time.time() - start) * 1000
+            logger.info(
+                "%s %s | params=%s | status=%s | %.1fms",
+                request.method, request.path,
+                dict(request.args), response.status_code, elapsed
+            )
+            return response
+        except Exception:
+            elapsed = (time.time() - start) * 1000
+            logger.error(
+                "%s %s | params=%s | EXCEPTION | %.1fms\n%s",
+                request.method, request.path,
+                dict(request.args), elapsed, traceback.format_exc()
+            )
+            raise
+    return wrapper</pre>
+
+<h2>使用方式</h2>
+
+<pre>@app.route("/api/users")
+@log_request
+def get_users():
+    ...</pre>
+
+<h2>高流量採樣機制</h2>
+
+<p>10,000 req/min 全記錄會撐爆磁碟 + 拖慢 I/O。設計原則：</p>
+
+<table>
+  <tr><th>場景</th><th>採樣率</th><th>原因</th></tr>
+  <tr><td>正常請求</td><td>1%</td><td>量太大，隨機採樣即可</td></tr>
+  <tr><td>500 錯誤</td><td>100%</td><td>錯誤不能漏掉</td></tr>
+  <tr><td>慢請求（&gt;500ms）</td><td>100%</td><td>效能異常不能漏掉</td></tr>
+  <tr><td>特定使用者/IP</td><td>100%（臨時）</td><td>debug 特定問題時開啟</td></tr>
+</table>
+
+</body>
+</html>

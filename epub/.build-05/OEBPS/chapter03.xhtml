@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 03：建立 Debug 工具箱</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 03：建立 Debug 工具箱</h1>
+
+<h2>三個 Debug 提示詞模板</h2>
+
+<h3>/debug-syntax — 語法/型別錯誤</h3>
+
+<p><strong>使用時機：</strong>SyntaxError / TypeError / NameError / AttributeError</p>
+
+<pre>你是一位 Python 除錯專家。
+我遇到以下錯誤，請：
+1. 指出錯誤的確切位置（檔案 + 行號）
+2. 說明根本原因（不是症狀）
+3. 給出最小修復方案
+4. 如果有隱藏的同類問題，一併列出
+
+錯誤訊息：[貼 stack trace]
+相關程式碼：[貼 10-20 行]
+
+輸出格式：
+- 根本原因：一句話
+- 修復方案：直接給修改後的程式碼
+- 其他風險：（無則省略）</pre>
+
+<hr/>
+
+<h3>/debug-logic — 邏輯錯誤</h3>
+
+<p><strong>使用時機：</strong>程式能跑但輸出結果不正確</p>
+
+<pre>你是一位嚴格的程式邏輯審查員。
+請用「假設-驗證」方法逐步分析：
+
+1. 列出 3 個可能導致錯誤輸出的假設
+2. 對每個假設說明如何用最少的程式碼驗證
+3. 從最可能的假設開始，逐一排除
+
+期望行為：[描述正確結果]
+實際行為：[描述錯誤結果]
+程式碼：[貼相關邏輯段]
+
+輸出格式：
+假設 1：[描述] → 驗證方式：[程式碼片段]
+假設 2：...
+假設 3：...</pre>
+
+<hr/>
+
+<h3>/debug-perf — 效能問題</h3>
+
+<p><strong>使用時機：</strong>程式太慢、記憶體暴增、CPU 飆高</p>
+
+<pre>你是一位效能優化專家。
+請分析以下程式碼的效能瓶頸：
+
+1. 找出時間複雜度最高的操作（O(n²) 以上優先）
+2. 找出不必要的重複計算
+3. 找出可以用快取/批次取代的 I/O 操作
+4. 給出修改優先順序（影響 × 難度矩陣）
+
+程式碼：[貼完整函式或模組]
+輸入規模：[例：10 萬筆資料]
+目前耗時：[例：12 秒]
+目標耗時：[例：&lt; 1 秒]</pre>
+
+<hr/>
+
+<h2>debug-info.md 模板</h2>
+
+<pre># Bug 回報單
+
+## 問題描述（一句話）
+當 [動作] 時，[發生了什麼]。
+
+## 期望行為
+[正確情況下應該發生什麼]
+
+## 實際行為
+[實際發生了什麼，含錯誤訊息或錯誤輸出]
+
+## Stack Trace
+[貼完整 traceback]
+
+## 已嘗試的方向
+- 試過：[方向 1]，結果：[無效/部分有效]
+- 試過：[方向 2]，結果：
+
+## 相關程式碼
+[貼最小能重現問題的程式碼，建議 20-50 行]
+
+## 環境資訊
+- Python 版本：
+- OS：
+- 關鍵套件版本：
+- 是否在 virtualenv：</pre>
+
+<hr/>
+
+<h2>CLAUDE.md Debug SOP 章節</h2>
+
+<h3>遇到 bug 時的角色設定</h3>
+
+<table>
+  <tr><th>錯誤類型</th><th>Claude Code 扮演的角色</th></tr>
+  <tr><td>SyntaxError / TypeError</td><td>嚴格的程式碼審查員，找出所有同類問題</td></tr>
+  <tr><td>邏輯錯誤（結果不對）</td><td>懷疑論者，先列假設再驗證，不接受「感覺」</td></tr>
+  <tr><td>效能問題</td><td>效能剖析師，用數字說話，不靠直覺</td></tr>
+  <tr><td>環境/部署問題</td><td>系統偵探，比對 dev/prod 差異</td></tr>
+</table>
+
+<div class="danger">
+<p><strong>鐵律：</strong>每次 debug 開始前，Claude Code 必須先列假設清單（按可能性排序），再逐一驗證。不接受直接給修復方案而沒有說明根本原因。</p>
+</div>
+
+</body>
+</html>

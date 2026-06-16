@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 01：Stack Trace 解讀</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 01：Stack Trace 解讀</h1>
+
+<h2>Stack Trace</h2>
+
+<pre>Traceback (most recent call last):
+  File "main.py", line 23, in &lt;module&gt;
+    result = process_data(df)
+  File "processor.py", line 45, in process_data
+    return df["timestamp"].apply(parse_date)
+  File "processor.py", line 12, in parse_date
+    return datetime.strptime(s, "%Y-%m-%d")
+ValueError: time data "2024/01/15" does not match format "%Y-%m-%d"</pre>
+
+<h2>解讀分析</h2>
+
+<table>
+  <tr><th>問題</th><th>答案</th></tr>
+  <tr><td>錯誤類型</td><td><code>ValueError</code> — 值的格式不符合預期</td></tr>
+  <tr><td>錯誤位置</td><td><code>processor.py</code> 第 12 行（parse_date 函式內）</td></tr>
+  <tr><td>根本原因</td><td>strptime 格式字串寫死為 %Y-%m-%d，無法處理斜線分隔的 2024/01/15</td></tr>
+  <tr><td>資料來源暗示</td><td>2024/01/15 是 Excel 或舊系統 CSV 的典型格式，說明資料來源不只一個</td></tr>
+</table>
+
+<h2>Stack Trace 三要素</h2>
+
+<table>
+  <tr><th>要素</th><th>說明</th><th>本例</th></tr>
+  <tr><td>錯誤類型</td><td>例外的類別名稱</td><td>ValueError</td></tr>
+  <tr><td>發生位置</td><td>最底層 File/Line（真正爆點）</td><td>processor.py:12</td></tr>
+  <tr><td>呼叫鏈</td><td>誰呼叫誰，從上到下</td><td>main.py:23 → processor.py:45 → processor.py:12</td></tr>
+</table>
+
+<div class="insight">
+<p><strong>閱讀原則：</strong>從最下面那行往上看。最下面 = 真正爆點；往上 = 呼叫者。不要從第一行開始讀。</p>
+</div>
+
+<hr/>
+
+<h2>修復程式碼</h2>
+
+<pre>import logging
+from datetime import datetime
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+SUPPORTED_FORMATS = [
+    "%Y-%m-%d",   # 2024-01-15
+    "%Y/%m/%d",   # 2024/01/15
+    "%d-%m-%Y",   # 15-01-2024
+]
+
+def parse_date(s: str) -> Optional[datetime]:
+    for fmt in SUPPORTED_FORMATS:
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            continue
+    logger.warning("無法解析日期格式：%r，回傳 None", s)
+    return None</pre>
+
+<h2>關鍵設計決策</h2>
+
+<table>
+  <tr><th>決策</th><th>原因</th></tr>
+  <tr><td>格式列表放函式外</td><td>加格式只改一處，不動函式邏輯</td></tr>
+  <tr><td>try/except 在迴圈內</td><td>每個格式獨立嘗試，失敗繼續下一個</td></tr>
+  <tr><td>Optional[datetime] 型別標注</td><td>呼叫方知道可能拿到 None，強迫處理空值</td></tr>
+</table>
+
+</body>
+</html>

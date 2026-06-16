@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="2.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+    <dc:title>Claude Code Pro — Lesson 04：生產級程式碼</dc:title>
+    <dc:creator opf:role="aut">Ethan Cole</dc:creator>
+    <dc:language>zh-TW</dc:language>
+    <dc:identifier id="BookId" opf:scheme="UUID">urn:uuid:cc-pro-lesson-04-2026-06-17</dc:identifier>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="css" href="styles.css" media-type="text/css"/>
+    <item id="chapter01" href="chapter01.xhtml" media-type="application/xhtml+xml"/>
+    <item id="chapter02" href="chapter02.xhtml" media-type="application/xhtml+xml"/>
+    <item id="chapter03" href="chapter03.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="chapter01"/>
+    <itemref idref="chapter02"/>
+    <itemref idref="chapter03"/>
+  </spine>
+</package>

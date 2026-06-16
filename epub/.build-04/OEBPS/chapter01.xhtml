@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW">
+<head>
+  <title>練習 01：從快樂路徑到生產級</title>
+  <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+<h1>練習 01：從快樂路徑到生產級</h1>
+
+<h2>原始問題程式碼</h2>
+
+<pre>def fetch_user(user_id):
+    conn = pymysql.connect(host='localhost', db='app',
+                           user='root', password='1234')
+    result = conn.execute(f"SELECT * FROM users WHERE id={user_id}")
+    return result.fetchone()</pre>
+
+<h2>問題清單（5 個）</h2>
+
+<table>
+  <tr><th>#</th><th>問題類型</th><th>說明</th></tr>
+  <tr><td>1</td><td>SQL 注入</td><td>f-string 拼接 SQL，攻擊者傳入 1 OR 1=1 可取得全部資料</td></tr>
+  <tr><td>2</td><td>硬編碼機密</td><td>password='1234' 寫死在程式碼，commit 後永久洩漏</td></tr>
+  <tr><td>3</td><td>連線資源洩漏</td><td>函式結束或拋例外時 conn 永遠不關閉，耗盡連線池</td></tr>
+  <tr><td>4</td><td>缺少錯誤處理</td><td>DB 掛掉直接拋未捕捉例外，呼叫方無法預期</td></tr>
+  <tr><td>5</td><td>回傳值不確定</td><td>fetchone() 找到回 tuple、找不到回 None，行為不一致</td></tr>
+</table>
+
+<hr/>
+
+<h2>生產級重寫</h2>
+
+<pre>import os
+import logging
+import pymysql
+import pymysql.cursors
+
+logger = logging.getLogger(__name__)
+
+def fetch_user(user_id: int) -&gt; dict | None:
+    """查詢單一使用者。找到回傳 dict，找不到回傳 None，失敗拋 RuntimeError。"""
+    conn = pymysql.connect(
+        host=os.environ["DB_HOST"],
+        db=os.environ["DB_NAME"],
+        user=os.environ["DB_USER"],
+        password=os.environ["DB_PASS"],
+        cursorclass=pymysql.cursors.DictCursor,
+    )
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM users WHERE id = %s", (user_id,)
+            )
+            return cursor.fetchone()
+    except pymysql.Error as e:
+        logger.error("fetch_user 失敗：user_id=%s, error=%s", user_id, e)
+        raise RuntimeError(f"資料庫查詢失敗：{e}") from e
+    finally:
+        conn.close()</pre>
+
+<h2>修正對照</h2>
+
+<table>
+  <tr><th>問題</th><th>原始</th><th>修正後</th></tr>
+  <tr><td>SQL 注入</td><td>f"...{user_id}"</td><td>%s 參數化查詢</td></tr>
+  <tr><td>硬編碼機密</td><td>password='1234'</td><td>os.environ["DB_PASS"]</td></tr>
+  <tr><td>連線洩漏</td><td>無關閉</td><td>finally: conn.close()</td></tr>
+  <tr><td>錯誤處理</td><td>無</td><td>except pymysql.Error + logging</td></tr>
+  <tr><td>回傳不確定</td><td>tuple 或 None</td><td>DictCursor → dict 或 None + 型別標注</td></tr>
+</table>
+
+<div class="danger">
+<p><strong>鐵律：</strong>SQL 注入是「最危險且最常見」的漏洞，修復成本極低（只需改一行），但被利用的代價是整個資料庫被讀取或刪除。<code>%s</code> 參數化查詢不可妥協。</p>
+</div>
+
+</body>
+</html>
