@@ -1,8 +1,3 @@
-# Next.js
-techblog-demo/.next/
-techblog-demo/node_modules/
-techblog-demo/.env.local
-
 # Google OAuth client secrets
 client_secret_*.json
 
