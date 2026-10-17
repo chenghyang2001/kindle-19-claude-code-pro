@@ -9,3 +9,4 @@
 | 章 | 完成日 | 實際耗時 | 和原解答／題目要求的差異 |
 | --- | --- | --- | --- |
 | 01 | 2026-10-18 | 4 分 | Chat 端依常識描述未實測；中途干預用 shell 改檔模擬；calculator 多做 CLI 錯誤處理，9 passed |
+| 02 | 2026-10-18 | 11 分 | 改寫前後 8 份提示詞皆 claude -p 實跑並用 pytest 驗產出（13 passed 1 xfailed）；對照組受全域 CLAUDE.md 污染，--bare 需 API key 只留範本；ex02 只實測情境 B |
