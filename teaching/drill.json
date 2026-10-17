@@ -1,0 +1,163 @@
+{
+  "book": "K19",
+  "repo": "kindle-19-claude-code-pro",
+  "title": "Claude Code Pro",
+  "prompt_source": "teaching/LESSON-PLAN.md",
+  "chapters": [
+    {
+      "id": "01",
+      "folder": "k19-ch01-practice",
+      "mode": "normal",
+      "minutes": 5,
+      "parallel_with": [],
+      "demo_dir": "demo/[01-從聊天機器人到開發夥伴]",
+      "note": "Chat 端不實際操作 claude.ai，只依常識寫對照"
+    },
+    {
+      "id": "02",
+      "folder": "k19-ch02-practice",
+      "mode": "normal",
+      "minutes": 5,
+      "parallel_with": [],
+      "demo_dir": "demo/[02-真正有效的提示詞技巧]"
+    },
+    {
+      "id": "03",
+      "folder": "k19-ch03-practice",
+      "mode": "isolated",
+      "minutes": 8,
+      "parallel_with": [],
+      "demo_dir": "demo/[03-建立專業開發環境]",
+      "note": "Hooks 一律寫進專案 .claude/settings.json，不碰全域"
+    },
+    {
+      "id": "04",
+      "folder": "k19-ch04-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[04-生產級程式碼]"
+    },
+    {
+      "id": "05",
+      "folder": "k19-ch05-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[05-快速除錯]"
+    },
+    {
+      "id": "06",
+      "folder": "k19-ch06-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[06-無痛測試]"
+    },
+    {
+      "id": "07",
+      "folder": "k19-ch07-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[07-無懼重構]"
+    },
+    {
+      "id": "08",
+      "folder": "k19-ch08-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[08-Agentic工作流程]"
+    },
+    {
+      "id": "09",
+      "folder": "k19-ch09-practice",
+      "mode": "normal",
+      "minutes": 8,
+      "parallel_with": [],
+      "demo_dir": "demo/[09-MCP白話文]",
+      "note": "只用唯讀操作（gh／GitHub API 讀 issues），不新增 user scope MCP"
+    },
+    {
+      "id": "10",
+      "folder": "k19-ch10-practice",
+      "mode": "normal",
+      "minutes": 5,
+      "parallel_with": [],
+      "demo_dir": "demo/[10-CI-CD與DevOps]",
+      "note": "只寫 workflow 與設定檔並做 YAML 驗證，不 push、不部署"
+    },
+    {
+      "id": "11",
+      "folder": "k19-ch11-practice",
+      "mode": "normal",
+      "minutes": 12,
+      "parallel_with": [],
+      "demo_dir": "demo/[11-專案實作1-SaaS登陸頁]",
+      "note": "Next.js 本機 build 驗證，不部署"
+    },
+    {
+      "id": "12",
+      "folder": "k19-ch12-practice",
+      "mode": "normal",
+      "minutes": 8,
+      "parallel_with": [],
+      "demo_dir": "demo/[12-專案實作2-自動化系統]",
+      "note": "先自建一個小型示範 pipeline 當「現有系統」"
+    },
+    {
+      "id": "13",
+      "folder": "k19-ch13-practice",
+      "mode": "normal",
+      "minutes": 10,
+      "parallel_with": [],
+      "demo_dir": "demo/[13-專案實作3-客戶端Web應用]",
+      "note": "資料庫改用本機 SQLite，不連 Neon"
+    },
+    {
+      "id": "14",
+      "folder": "k19-ch14-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[14-團隊中使用Claude-Code]",
+      "note": "agents 放專案 .claude/agents/"
+    },
+    {
+      "id": "15",
+      "folder": "k19-ch15-practice",
+      "mode": "normal",
+      "minutes": 6,
+      "parallel_with": [],
+      "demo_dir": "demo/[15-安全性與品質把關]"
+    },
+    {
+      "id": "16",
+      "folder": "k19-ch16-practice",
+      "mode": "normal",
+      "minutes": 4,
+      "parallel_with": [],
+      "demo_dir": "demo/[附A-快速參考提示詞庫]",
+      "note": "附錄 A"
+    },
+    {
+      "id": "17",
+      "folder": "k19-ch17-practice",
+      "mode": "normal",
+      "minutes": 4,
+      "parallel_with": [],
+      "demo_dir": "demo/[附B-團隊CLAUDE.md範本]",
+      "note": "附錄 B"
+    },
+    {
+      "id": "18",
+      "folder": "k19-ch18-practice",
+      "mode": "normal",
+      "minutes": 4,
+      "parallel_with": [],
+      "demo_dir": "demo/[附C-AI程式碼資安檢查清單]",
+      "note": "附錄 C"
+    }
+  ]
+}
