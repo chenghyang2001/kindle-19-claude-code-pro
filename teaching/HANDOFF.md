@@ -11,3 +11,4 @@
 | 01 | 2026-10-18 | 4 分 | Chat 端依常識描述未實測；中途干預用 shell 改檔模擬；calculator 多做 CLI 錯誤處理，9 passed |
 | 02 | 2026-10-18 | 11 分 | 改寫前後 8 份提示詞皆 claude -p 實跑並用 pytest 驗產出（13 passed 1 xfailed）；對照組受全域 CLAUDE.md 污染，--bare 需 API key 只留範本；ex02 只實測情境 B |
 | 03 | 2026-10-18 | 9 分 | hooks 只寫專案 .claude/settings.json，claude -p 實測觸發通過、pytest 4 passed；用 ruff format 取代 black；本章無 MCP 任務；開窗時誤開兩個已關閉，改預先允許外部 imports |
+| 04 | 2026-10-18 | 5 分 | pymysql 改 sqlite3，參數化／環境變數／finally／logging 全做，28 passed（含 SQL 注入測試）；無 starter 改自寫函式；pre-commit 與 Actions 只寫範本 |
