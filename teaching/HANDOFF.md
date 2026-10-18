@@ -17,3 +17,4 @@
 | 07 | 2026-10-18 | 3 分 | 先建 12 個特性化測試再 Rename→Extract，12→13→16 全綠、每步獨立 commit；找 14 個異味（題目 5）；刻意保留怪行為不修 |
 | 08 | 2026-10-18 | 7 分 | 合約寫成 JSON Schema 2020-12 並驗證合格／不合格樣本（抓 6 違規）、DAG 時間模擬、mock 協作 6 情境，12 passed；題目原只要文字與簡化 schema |
 | 09 | 2026-10-18 | 6 分 | 能力地圖用 claude mcp list（17 server）；gh api GET 與 GitHub MCP 對照（repo 0 issue）；Notion 只用 --scope project 寫 .mcp.json 範本；Gmail 唯讀實查；使用者層 MCP 未變 |
+| 10 | 2026-10-18 | 8 分 | ci.yml（pip 快取）＋deploy 範本＋多環境設定，yaml.safe_load 驗證並本機依 needs 跑 run 指令；未上 GitHub 實跑故快取命中未驗；本機 3.14 非 3.11；Vercel 只範本 |
