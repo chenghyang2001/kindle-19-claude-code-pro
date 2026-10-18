@@ -25,3 +25,4 @@
 | 15 | 2026-10-18 | 7 分 | 漏洞版＋修復版（Python，題目片段為 Node.js），bandit 12→3 且 HIGH 歸零、pytest 13 passed；ex02 CI YAML 只文字設計未產檔 |
 | 16 | 2026-10-18 | 5 分 | 專案 prompts/ 8 模板＋索引＋填變數工具，21 passed、claude -p 實跑 1 模板；題目要 ~/.claude/prompts/ 改專案層；slash command 未寫入全域 |
 | 17 | 2026-10-18 | 9 分 | 自建最小 email-automation 子專案套用附錄 B 團隊 CLAUDE.md（@ 匯入），9/9 OK、claude -p 5 題皆遵守；匯入檔內規則 0/3 遵守、移到主檔 2/2；真寄信只範本 |
+| 18 | 2026-10-18 | 10 分 | 附錄 C 26 項逐項審查 ch15 漏洞版（✅3/❌16）與修復版（✅5/❌14），攻擊重現＋bandit＋pip-audit；修復版另找出時間差帳號列舉、ping 參數注入、IDOR 等；pip check 改 pip-audit；未改 ch15 程式 |
