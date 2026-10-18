@@ -1,0 +1,5 @@
+# CI 與本機開發用的工具（actions/cache 的 key 會以此檔 hash 計算）
+pytest>=8.0
+ruff>=0.6
+bandit>=1.7
+pyyaml>=6.0

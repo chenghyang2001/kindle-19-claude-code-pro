@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+# 真實環境變數檔不入版控，只提交 *.example 範本
+.env
+.env.*
+!.env.example
+!.env.*.example
+credentials.json
+token.json
+.vercel/
+*.stackdump
+core
+*.core
+*.dmp

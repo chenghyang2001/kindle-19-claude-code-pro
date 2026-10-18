@@ -1,0 +1,5 @@
+請幫我看一下這段 TypeScript 程式碼有什麼問題。
+
+```typescript
+{{file:samples/user_service.ts}}
+```

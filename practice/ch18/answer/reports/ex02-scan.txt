@@ -1,0 +1,27 @@
+== ch15-sample/vulnerable（2 個 .py）
+  [FAIL] A1 SQL 用字串拼接/f-string       app.py:36, app.py:43
+  [FAIL] A3 疑似硬編碼密鑰                  app.py:19, app.py:20
+  [FAIL] A4 弱雜湊存密碼（md5/sha1）         app.py:29, app.py:42
+  [FAIL] A5 shell=True 執行指令          app.py:7, app.py:57, app.py:58
+  [FAIL] A6 eval/exec/pickle.loads   app.py:63, app.py:68
+  [FAIL] A7 用 assert 做權限檢查           app.py:73
+  [PASS] C2 DEBUG=True               
+  [PASS] D3 用 random 產生安全值           
+  [PASS] D1 import 的模組都真實存在   
+  [FAIL] B2 依賴版本鎖定檔           找不到
+  [N/A] C1 .env 已列入 .gitignore
+== ch15-sample/fixed（2 個 .py）
+  [PASS] A1 SQL 用字串拼接/f-string       
+  [PASS] A3 疑似硬編碼密鑰                  
+  [PASS] A4 弱雜湊存密碼（md5/sha1）         
+  [PASS] A5 shell=True 執行指令          
+  [PASS] A6 eval/exec/pickle.loads   
+  [PASS] A7 用 assert 做權限檢查           
+  [PASS] C2 DEBUG=True               
+  [PASS] D3 用 random 產生安全值           
+  [PASS] D1 import 的模組都真實存在   
+  [FAIL] B2 依賴版本鎖定檔           找不到
+  [N/A] C1 .env 已列入 .gitignore
+== 目前 Python 環境的依賴
+  [PASS] B1 pip check（相依衝突）             No broken requirements found.
+  [PASS] B1 pip-audit（已知 CVE）           No known vulnerabilities found

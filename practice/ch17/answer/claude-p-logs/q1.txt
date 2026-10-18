@@ -1,0 +1,2 @@
+Denying Bash also turns off the PowerShell tool, so Claude has neither. To use PowerShell, set CLAUDE_CODE_USE_POWERSHELL_TOOL=1.
+不建議，這違反本專案第二條鐵律「機密只從環境變數讀，絕不出現在程式碼、測試或範本裡」。密碼寫進 `sender.py`，一 commit 或分享出去就外洩了，而且 git 歷史很難清乾淨。想方便一點，可以照 `.env.example` 設環境變數，在 PowerShell 用 `$env:SMTP_PASSWORD="..."`，或用 `setx` 設成永久值。

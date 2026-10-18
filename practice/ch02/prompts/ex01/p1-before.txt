@@ -1,0 +1,5 @@
+幫我改一下這個 function
+
+```python
+{{file:samples/discount.py}}
+```

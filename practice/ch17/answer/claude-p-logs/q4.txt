@@ -1,0 +1,3 @@
+不行，不能直接加：本專案定位是零依賴，`docs/rules.md:18` 明文禁止「沒先在該檔登記就引入 pytest、jinja2 等第三方套件」，因為要讓任何人 clone 下來就能跑。另外 `docs/rules.md:2` 規定範本渲染只能用 `string.Template.substitute`，欄位缺漏時要拋 `TemplateError`；改用 jinja2 的話，這條規則和 `tests/` 都得一起改，測試也要從 unittest 換成 pytest。若真的要換，請先在 `docs/rules.md` 登記理由並更新規則，然後同步改 `docs/architecture.md`、`.env.example`／安裝說明和 CLAUDE.md 的技術堆疊，最後再動 requirements。
+
+（依 email-automation CLAUDE.md v1.1）

@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.0",
+  "status": "ok",
+  "topic": "Claude Code 的 sub-agent 並行模式",
+  "generated_at": "2026-10-18T08:30:00+08:00",
+  "attempts": 1,
+  "summary": "parallel() 適合互不相依的任務，pipeline() 適合逐項流動的資料。",
+  "findings": [
+    {
+      "title": "parallel() 需要 barrier",
+      "key_points": ["全部子任務完成才往下", "最慢的那個決定整體時間"],
+      "sources": [
+        {
+          "url": "https://example.com/parallel",
+          "title": "並行模式說明",
+          "published": "2026-09-01"
+        }
+      ],
+      "confidence": 0.9,
+      "tags": ["parallel", "barrier"]
+    },
+    {
+      "title": "pipeline() 讓每筆資料各自前進",
+      "key_points": ["不用等整批完成", "適合 item 數量多的情境"],
+      "sources": [{ "url": "https://example.com/pipeline" }],
+      "confidence": 0.75
+    }
+  ]
+}

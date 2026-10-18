@@ -1,0 +1,34 @@
+讀到 3 筆，欄位：['id', 'timestamp', 'amount']
+Traceback (most recent call last):
+  File "~\workspace\k19-ch05-practice\ex01\buggy\main.py", line 23, in <module>
+    result = process_data(df)
+  File "~\workspace\k19-ch05-practice\ex01\buggy\processor.py", line 45, in process_data
+    return df["timestamp"].apply(parse_date)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\series.py", line 5084, in apply
+    ).apply()
+      ~~~~~^^
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\apply.py", line 1520, in apply
+    return self.apply_standard()
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\apply.py", line 1578, in apply_standard
+    mapped = obj._map_values(mapper=curried)
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\base.py", line 1020, in _map_values
+    return arr.map(mapper, na_action=na_action)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\arrays\base.py", line 2745, in map
+    return map_array(self, mapper, na_action=na_action)
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\pandas\core\algorithms.py", line 1715, in map_array
+    return lib.map_infer(values, mapper)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "pandas/_libs/lib.pyx", line 3071, in pandas._libs.lib.map_infer
+  File "~\workspace\k19-ch05-practice\ex01\buggy\processor.py", line 12, in parse_date
+    return datetime.strptime(s, "%Y-%m-%d")
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\_strptime.py", line 815, in _strptime_datetime_datetime
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                                    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "~\AppData\Local\Python\pythoncore-3.14-64\Lib\_strptime.py", line 555, in _strptime
+    raise ValueError("time data %r does not match format %r" %
+                     (data_string, format))
+ValueError: time data '2024/01/15' does not match format '%Y-%m-%d'

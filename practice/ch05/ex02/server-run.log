@@ -1,0 +1,42 @@
+2026-10-18 07:45:49,074 INFO werkzeug: WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5055
+2026-10-18 07:45:49,074 INFO werkzeug: Press CTRL+C to quit
+2026-10-18 07:45:49,491 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.2ms
+2026-10-18 07:45:49,491 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:49] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:50,080 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.3ms
+2026-10-18 07:45:50,081 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:50] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:50,666 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:50,669 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:50] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:51,279 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:51,280 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:51] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:51,895 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:51,895 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:51] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:52,487 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:52,487 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:52] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:53,090 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:53,090 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:53] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:53,691 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:53,691 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:53] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:54,296 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:54,296 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:54] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:54,886 INFO request: GET /api/users params={'path': {}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:54,887 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:54] "GET /api/users HTTP/1.1" 200 -
+2026-10-18 07:45:55,478 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:55] "GET /legacy/users/2 HTTP/1.1" 500 -
+2026-10-18 07:45:55,518 INFO request: GET /api/users params={'path': {}, 'query': {'limit': '1'}} status=200 0.1ms
+2026-10-18 07:45:55,518 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:55] "GET /api/users?limit=1 HTTP/1.1" 200 -
+2026-10-18 07:45:55,575 INFO request: GET /api/users/1 params={'path': {'user_id': 1}, 'query': {}} status=200 0.1ms
+2026-10-18 07:45:55,575 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:55] "GET /api/users/1 HTTP/1.1" 200 -
+2026-10-18 07:45:55,616 ERROR request: GET /api/users/2 params={'path': {'user_id': 2}, 'query': {}} status=500 0.0ms 未處理的例外
+Traceback (most recent call last):
+  File "~\workspace\k19-ch05-practice\ex02\request_logger.py", line 49, in wrapper
+    response = make_response(view(*args, **kwargs))
+                             ~~~~^^^^^^^^^^^^^^^^^
+  File "~\workspace\k19-ch05-practice\ex02\app.py", line 39, in get_user_email
+    return jsonify(id=user_id, email=USERS[user_id]["email"].lower())
+                                     ~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'email'
+2026-10-18 07:45:55,617 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:55] "GET /api/users/2 HTTP/1.1" 500 -
+2026-10-18 07:45:55,680 WARNING request: GET /api/users/999 params={'path': {'user_id': 999}, 'query': {}} status=404 0.1ms
+2026-10-18 07:45:55,680 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:55] "GET /api/users/999 HTTP/1.1" 404 -
+2026-10-18 07:45:55,719 INFO request: POST /api/login params={'path': {}, 'query': {}, 'json': {'user': 'bob', 'password': '***'}} status=200 0.1ms
+2026-10-18 07:45:55,720 INFO werkzeug: 127.0.0.1 - - [18/Oct/2026 07:45:55] "POST /api/login HTTP/1.1" 200 -

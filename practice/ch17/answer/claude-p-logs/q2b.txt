@@ -1,0 +1,5 @@
+```bash
+PYTHONUTF8=1 python -m unittest discover -s tests -v
+```
+
+（依 email-automation CLAUDE.md v1.1）

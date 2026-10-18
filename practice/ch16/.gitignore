@@ -1,0 +1,8 @@
+__pycache__/
+.pytest_cache/
+*.stackdump
+core
+*.core
+*.dmp
+.env
+runs/.claude/

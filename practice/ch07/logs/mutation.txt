@@ -1,0 +1,6 @@
+[PM2.5 上限 <= 改成 <] 2 failed, 14 passed in 0.13s
+[溫度下限 <= 改成 <] 2 failed, 14 passed in 0.15s
+[== True 改成 truthy] 1 failed, 15 passed in 0.11s
+[空結果回傳 0 改成 0.0] 1 failed, 15 passed in 0.11s
+[四捨五入位數 2 改成 1] 2 failed, 14 passed in 0.12s
+[拿掉 998 排除條件] 16 passed in 0.04s

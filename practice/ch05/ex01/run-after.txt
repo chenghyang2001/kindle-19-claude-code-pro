@@ -1,0 +1,37 @@
+$ python main.py
+讀到 3 筆，欄位：['id', 'timestamp', 'amount']
+0   2024-01-14
+1   2024-01-15
+2   2024-01-16
+Name: timestamp, dtype: datetime64[us]
+$ python main.py ../data/messy.csv
+WARNING processor: 無法解析日期 'Jan 17 2024'，支援格式：%Y-%m-%d, %Y/%m/%d, %d-%m-%Y
+WARNING processor: parse_date 收到空值：nan
+WARNING processor: 無法解析日期 '2024-02-30'，支援格式：%Y-%m-%d, %Y/%m/%d, %d-%m-%Y
+讀到 6 筆，欄位：['id', 'timestamp', 'amount']
+0   2024-01-14
+1   2024-01-15
+2   2024-01-16
+3          NaT
+4          NaT
+5          NaT
+Name: timestamp, dtype: datetime64[us]
+$ python -m pytest -v test_processor.py
+test_processor.py::test_supported_formats[2024-01-15] PASSED             [  5%]
+test_processor.py::test_supported_formats[2024/01/15] PASSED             [ 11%]
+test_processor.py::test_supported_formats[15-01-2024] PASSED             [ 17%]
+test_processor.py::test_supported_formats[  2024-01-15  ] PASSED         [ 23%]
+test_processor.py::test_original_failing_value_now_parses PASSED         [ 29%]
+test_processor.py::test_unparseable_returns_none_and_warns[Jan 15 2024] PASSED [ 35%]
+test_processor.py::test_unparseable_returns_none_and_warns[2024.01.15] PASSED [ 41%]
+test_processor.py::test_unparseable_returns_none_and_warns[] PASSED      [ 47%]
+test_processor.py::test_unparseable_returns_none_and_warns[01-15-2024] PASSED [ 52%]
+test_processor.py::test_unparseable_returns_none_and_warns[2024-02-30] PASSED [ 58%]
+test_processor.py::test_empty_values_return_none[None] PASSED            [ 64%]
+test_processor.py::test_empty_values_return_none[nan] PASSED             [ 70%]
+test_processor.py::test_empty_values_return_none[empty2] PASSED          [ 76%]
+test_processor.py::test_non_string_returns_none PASSED                   [ 82%]
+test_processor.py::test_process_data_sample_csv_no_exception PASSED      [ 88%]
+test_processor.py::test_process_data_messy_csv_keeps_going PASSED        [ 94%]
+test_processor.py::test_process_data_missing_column PASSED               [100%]
+============================= 17 passed in 0.85s ==============================

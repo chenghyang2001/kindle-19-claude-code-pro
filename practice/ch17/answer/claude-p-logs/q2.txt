@@ -1,0 +1,4 @@
+Denying Bash also turns off the PowerShell tool, so Claude has neither. To use PowerShell, set CLAUDE_CODE_USE_POWERSHELL_TOOL=1.
+```bash
+PYTHONUTF8=1 python -m unittest discover -s tests -v
+```

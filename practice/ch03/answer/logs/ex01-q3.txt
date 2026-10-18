@@ -1,0 +1,8 @@
+這個專案禁止以下操作：
+
+1. 直接連線或修改正式（prod）資料庫；schema 變更一律要透過遷移檔。
+2. 把 API key、密碼或 `.env` 寫進程式碼或 commit。
+3. 使用 `git push --force`，或用 `--no-verify` 跳過 hook。
+4. 修改全域 `~/.claude/` 設定（設定只能寫在本專案的 `.claude/`），也不能刪除或跳過既有測試來讓 CI 變綠。
+
+資訊來源：`CLAUDE.md` 第 5 節「禁止事項」（同檔「本專案例外」也重申不可修改全域 `~/.claude/settings.json`）。

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.env
+.env*
+*.stackdump
+core
+*.core
+*.dmp
+*.tsbuildinfo

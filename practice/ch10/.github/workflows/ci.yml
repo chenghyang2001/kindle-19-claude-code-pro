@@ -1,0 +1,97 @@
+# CI pipeline：test → lint → security 依序執行，任一步失敗就停止
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 同一分支有新 push 時取消舊的執行，省 runner 時間
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  test:
+    name: 測試（pytest）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 設定 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # 題目指定用 actions/cache；key 綁定 OS + Python 版本 + 依賴檔 hash，依賴一改快取就失效
+      - name: 快取 pip 下載
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-
+
+      - name: 安裝依賴
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: 執行測試
+        run: python -m pytest -q
+
+  lint:
+    name: 格式檢查（ruff）
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 設定 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 快取 pip 下載
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-
+
+      - name: 安裝依賴
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: ruff 檢查
+        run: |
+          python -m ruff check .
+          python -m ruff format --check .
+
+  security:
+    name: 安全掃描（bandit）
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 設定 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 快取 pip 下載
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-
+
+      - name: 安裝依賴
+        run: python -m pip install -r requirements-dev.txt
+
+      # 只掃產品程式碼；中等以上嚴重度才讓 job 失敗
+      - name: bandit 掃描
+        run: python -m bandit -r src -ll

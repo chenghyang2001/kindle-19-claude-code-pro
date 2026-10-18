@@ -1,0 +1,3 @@
+# 個人 CLAUDE.local.md 範本（複製成 CLAUDE.local.md，已被 .gitignore 排除）
+# 只留下自己的角色那一行
+@docs/roles/backend.md

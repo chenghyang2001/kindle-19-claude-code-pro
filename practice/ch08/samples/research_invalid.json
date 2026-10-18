@@ -1,0 +1,14 @@
+{
+  "contract_version": "2.0",
+  "status": "ok",
+  "topic": "AI",
+  "generated_at": "2026-10-18T08:30:00+08:00",
+  "findings": [
+    {
+      "title": "缺來源且可信度超出範圍",
+      "key_points": [],
+      "confidence": 1.7,
+      "author": "不在合約中的欄位"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+在專案根目錄執行：
+
+```bash
+PYTHONUTF8=1 python -m pytest -q
+```
+
+- `PYTHONUTF8=1` 不能省略，因為 Windows 預設編碼是 cp950。
+- 測試都放在 `tests/`，使用 pytest 8。
+
+**資訊來源：** `CLAUDE.md` 第 3 節「執行方式」與第 6 節「常用指令」

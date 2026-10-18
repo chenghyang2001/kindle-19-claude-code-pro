@@ -1,0 +1,38 @@
+Python 3.14.3
+
+===== vulnerable =====
+P1 get_user(2**64)              -> (True, [])
+P2 get_user(-1)                 -> (True, [])
+P3 login('a'*100000, 'x')       -> (True, None)
+P5 has verify_token              -> False
+P5 has logout                    -> False
+P5 has revoke_token              -> False
+P5 has reset_password            -> False
+P6 token 兩次相同              -> True (1.68309574a47027c96528fd...)
+P7 get_user 參數               -> ('conn', 'user_id')
+P8 登入耗時 存在帳號    0.01 ms / 不存在帳號    0.01 ms  比值 1.3x
+P9 50 次錯誤後正確密碼仍可登入 -> True
+P10 users 欄位                  -> ['id', 'username', 'pw_hash', 'role']
+P11 subprocess 有 timeout=      -> False
+P12 有 logging / print 敏感值   -> False False
+
+===== fixed =====
+P1 get_user(2**64)              -> (False, 'OverflowError: Python int too large to convert to SQLite INTEGER')
+P2 get_user(-1)                 -> (True, [])
+P3 login('a'*100000, 'x')       -> (True, None)
+P4 _is_valid_host('-t'    )       -> True
+P4 _is_valid_host('-l'    )       -> True
+P4 _is_valid_host('--help')       -> True
+P5 has verify_token              -> False
+P5 has logout                    -> False
+P5 has revoke_token              -> False
+P5 has reset_password            -> False
+P6 token 兩次相同              -> True (1.73705ff0b9b755f4beff33...)
+P7 get_user 參數               -> ('conn', 'user_id')
+P8 登入耗時 存在帳號  192.49 ms / 不存在帳號    0.01 ms  比值 30170.9x
+P9 50 次錯誤後正確密碼仍可登入 -> True
+P10 users 欄位                  -> ['id', 'username', 'pw_hash', 'role']
+P11 subprocess 有 timeout=      -> False
+P12 有 logging / print 敏感值   -> False False
+
+P13 依賴鎖定檔                  -> 無

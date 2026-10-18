@@ -1,0 +1,6 @@
+這是一個用 **Flask 3.1** 寫的小型 **待辦事項（Todo）REST API** 教學 demo，提供 `/api/health` 健康檢查，以及 `/api/todos` 的新增和查詢。
+資料目前存在記憶體裡，伺服器重啟就會清空。CLAUDE.md 寫說開發環境要用 SQLite、正式環境打算用 PostgreSQL，但兩者都還沒接上。
+程式採用 app factory（`create_app()`）加 Blueprint 架構，測試用 pytest，每個 API 都要有正常、邊界、錯誤三種案例；Render 部署還在規劃中。
+這是 Kindle 書籍第 3 章的練習專案，另外有 `exercise-01-基礎.md`、`exercise-02-進階.md` 兩份練習題和 `answer/` 解答。
+
+**資訊來源**：只有專案根目錄的 `CLAUDE.md`（第 1～4 節和「本專案例外」）。其他檔案都沒有打開看，也沒有修改任何檔案。

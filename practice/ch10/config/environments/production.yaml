@@ -1,0 +1,19 @@
+# production 環境設定：只放「非機密」值；機密只寫來源（Vercel 環境變數），不寫真值
+environment: production
+vercel_target: production
+git_branch: main
+variables:
+  DATABASE_URL:
+    secret: true
+    source: vercel-env          # 存在 Vercel Dashboard → Production
+    note: 連 production DB
+  NEXT_PUBLIC_API_URL:
+    secret: false
+    value: https://api.example.com
+  OPENAI_API_KEY:
+    secret: true
+    source: vercel-env
+    note: 與 staging 同一把 key（題目設定），用量上限由 OpenAI 後台控管
+  FEATURE_FLAG_NEW_UI:
+    secret: false
+    value: "false"

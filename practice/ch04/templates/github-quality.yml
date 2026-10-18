@@ -1,0 +1,14 @@
+# 範本：放到 .github/workflows/quality.yml。需要 GitHub repo，本練習未建立、未執行。
+name: quality
+on: [pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pytest
+      - run: python tools/quality_gate.py src tools
+      - run: python -m pytest -q

@@ -1,0 +1,14 @@
+.env
+credentials.json
+token.json
+*.stackdump
+core
+*.core
+*.dmp
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.db
+.claude/settings.local.json
+.claude/hooks/*.log

@@ -1,0 +1,2 @@
+-t -> CalledProcessError exit 1 (未捕捉，呼叫端會崩潰) �������w IP ��}�C 
+-a -> CalledProcessError exit 1 (未捕捉，呼叫端會崩潰) �������w IP ��}�C 

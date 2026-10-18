@@ -1,0 +1,91 @@
+
+=== job: test ===
+  - 略過 uses: actions/checkout@v4（本機不需要）
+  - 略過 uses: actions/setup-python@v5（本機不需要）
+  - 略過 uses: actions/cache@v4（本機不需要）
+  $ python -m pip install -r requirements-dev.txt
+    orkspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (2.3.1)
+    Requirement already satisfied: packaging>=22 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (26.3)
+    Requirement already satisfied: pluggy<2,>=1.5 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (1.7.0)
+    Requirement already satisfied: pygments>=2.7.2 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (2.21.0)
+    Requirement already satisfied: stevedore>=1.20.0 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from bandit>=1.7->-r requirements-dev.txt (line 4)) (5.9.1)
+    Requirement already satisfied: rich in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from bandit>=1.7->-r requirements-dev.txt (line 4)) (15.0.0)
+    Requirement already satisfied: markdown-it-py>=2.2.0 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from rich->bandit>=1.7->-r requirements-dev.txt (line 4)) (4.2.0)
+    Requirement already satisfied: mdurl~=0.1 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from markdown-it-py>=2.2.0->rich->bandit>=1.7->-r requirements-dev.txt (line 4)) (0.1.2)
+    
+    [notice] A new release of pip is available: 25.3 -> 26.2.1
+    [notice] To update, run: python.exe -m pip install --upgrade pip
+  $ python -m pytest -q
+    ................                                                         [100%]
+    16 passed in 0.24s
+  ✓ job test 通過
+
+=== job: lint ===
+  - 略過 uses: actions/checkout@v4（本機不需要）
+  - 略過 uses: actions/setup-python@v5（本機不需要）
+  - 略過 uses: actions/cache@v4（本機不需要）
+  $ python -m pip install -r requirements-dev.txt
+    orkspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (2.3.1)
+    Requirement already satisfied: packaging>=22 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (26.3)
+    Requirement already satisfied: pluggy<2,>=1.5 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (1.7.0)
+    Requirement already satisfied: pygments>=2.7.2 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (2.21.0)
+    Requirement already satisfied: stevedore>=1.20.0 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from bandit>=1.7->-r requirements-dev.txt (line 4)) (5.9.1)
+    Requirement already satisfied: rich in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from bandit>=1.7->-r requirements-dev.txt (line 4)) (15.0.0)
+    Requirement already satisfied: markdown-it-py>=2.2.0 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from rich->bandit>=1.7->-r requirements-dev.txt (line 4)) (4.2.0)
+    Requirement already satisfied: mdurl~=0.1 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from markdown-it-py>=2.2.0->rich->bandit>=1.7->-r requirements-dev.txt (line 4)) (0.1.2)
+    
+    [notice] A new release of pip is available: 25.3 -> 26.2.1
+    [notice] To update, run: python.exe -m pip install --upgrade pip
+  $ python -m ruff check .
+    All checks passed!
+  $ python -m ruff format --check .
+    11 files already formatted
+  ✓ job lint 通過
+
+=== job: security ===
+  - 略過 uses: actions/checkout@v4（本機不需要）
+  - 略過 uses: actions/setup-python@v5（本機不需要）
+  - 略過 uses: actions/cache@v4（本機不需要）
+  $ python -m pip install -r requirements-dev.txt
+    orkspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (2.3.1)
+    Requirement already satisfied: packaging>=22 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (26.3)
+    Requirement already satisfied: pluggy<2,>=1.5 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (1.7.0)
+    Requirement already satisfied: pygments>=2.7.2 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from pytest>=8.0->-r requirements-dev.txt (line 2)) (2.21.0)
+    Requirement already satisfied: stevedore>=1.20.0 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from bandit>=1.7->-r requirements-dev.txt (line 4)) (5.9.1)
+    Requirement already satisfied: rich in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from bandit>=1.7->-r requirements-dev.txt (line 4)) (15.0.0)
+    Requirement already satisfied: markdown-it-py>=2.2.0 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from rich->bandit>=1.7->-r requirements-dev.txt (line 4)) (4.2.0)
+    Requirement already satisfied: mdurl~=0.1 in ~\workspace\k19-ch10-practice\.venv\lib\site-packages (from markdown-it-py>=2.2.0->rich->bandit>=1.7->-r requirements-dev.txt (line 4)) (0.1.2)
+    
+    [notice] A new release of pip is available: 25.3 -> 26.2.1
+    [notice] To update, run: python.exe -m pip install --upgrade pip
+  $ python -m bandit -r src -ll
+    Run started:2026-10-18 00:20:00.638601+00:00
+    
+    Test results:
+    	No issues identified.
+    
+    Code scanned:
+    	Total lines of code: 20
+    	Total lines skipped (#nosec): 0
+    	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+    
+    Run metrics:
+    	Total issues (by severity):
+    		Undefined: 0
+    		Low: 0
+    		Medium: 0
+    		High: 0
+    	Total issues (by confidence):
+    		Undefined: 0
+    		Low: 0
+    		Medium: 0
+    		High: 0
+    Files skipped (0):
+    [main]	INFO	profile include tests: None
+    [main]	INFO	profile exclude tests: None
+    [main]	INFO	cli include tests: None
+    [main]	INFO	cli exclude tests: None
+    [main]	INFO	running on Python 3.14.3
+  ✓ job security 通過
+
+全部 job 通過

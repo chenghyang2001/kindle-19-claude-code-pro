@@ -1,0 +1,12 @@
+Denying Bash also turns off the PowerShell tool, so Claude has neither. To use PowerShell, set CLAUDE_CODE_USE_POWERSHELL_TOOL=1.
+- **驗證暗號**
+  - `docs/api-conventions.md`：**API-4417**
+  - `docs/db-rules.md`：**DB-7731**
+  - `docs/deploy-rules.md`：**DEPLOY-2093**
+- **目前角色**：**後端工程師**。`CLAUDE.local.md` 匯入的是 `docs/roles/backend.md`，它負責 `order_report/` 和 DB migration；新增端點時要同時更新 API 規範範例和單元測試；資料量超過 1 萬筆的報表查詢要附 EXPLAIN 結果。
+- **名稱以 `report-` 開頭的 subagent，共 5 個**
+  - `report-db-schema`：子任務 A，設計 orders 資料表和聚合查詢。這是第一步，其他子任務都要等它完成。
+  - `report-api-endpoint`：子任務 B，實作 `GET /api/reports/orders`，要等 A 完成。
+  - `report-frontend-chart`：子任務 C，做前端的日營收長條圖。只依賴 API 回應格式，可以和 D 同時進行。
+  - `report-csv-export`：子任務 D，匯出 UTF-8 BOM 格式的 CSV，可以和 C 同時進行。
+  - `report-test-writer`：子任務 E，寫整合測試，最後才執行，要等 A、B、D 都完成。

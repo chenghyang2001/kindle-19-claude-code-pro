@@ -1,0 +1,8 @@
+id,sender,subject,body,received_at,has_attachment,labels
+1,boss@acme.com,URGENT: Q3 報告今天下班前要交,請在今天 17:00 前把 Q3 報告寄給我，可以嗎？,2026-10-17T09:05:00,true,INBOX
+2,newsletter@shop.com,本週特價 50% off,點此查看本週優惠商品。,2026-10-17T07:00:00,false,PROMOTIONS
+3,alice@partner.com,合約草稿確認,附件是合約草稿，請確認第 3 條條款是否 OK？截止日 2026-10-20。,2026-10-17T10:12:00,true,INBOX
+4,noreply@github.com,[repo] CI passed,Your workflow run succeeded.,2026-10-17T11:00:00,false,UPDATES
+5,bob@team.com,午餐要不要一起,中午要一起吃飯嗎？,2026-10-17T11:30:00,false,INBOX
+6,ceo@acme.com,重要：董事會簡報資料,下週一董事會，請準備營收與成本分析。這份簡報會影響明年預算分配，需要包含過去四季的趨勢、各產品線毛利、以及主要風險。請盡快回覆預計完成時間。,2026-10-17T08:00:00,true,INBOX
+7,spam@lottery.biz,恭喜中獎,請提供銀行帳號領獎。,2026-10-17T06:00:00,false,SPAM

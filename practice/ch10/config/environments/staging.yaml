@@ -1,0 +1,19 @@
+# staging 環境設定：只放「非機密」值；機密只寫來源（Vercel 環境變數），不寫真值
+environment: staging
+vercel_target: preview          # Vercel 的 Preview 環境，綁 staging 分支
+git_branch: staging
+variables:
+  DATABASE_URL:
+    secret: true
+    source: vercel-env          # 存在 Vercel Dashboard → Preview（staging 分支）
+    note: 連 staging DB（例：Neon 的 staging branch）
+  NEXT_PUBLIC_API_URL:
+    secret: false
+    value: https://api-staging.example.com
+  OPENAI_API_KEY:
+    secret: true
+    source: vercel-env
+    note: 與 production 同一把 key，但在 OpenAI 後台設專案層級的用量上限
+  FEATURE_FLAG_NEW_UI:
+    secret: false
+    value: "true"

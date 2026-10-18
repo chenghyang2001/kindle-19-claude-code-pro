@@ -1,0 +1,3 @@
+我派了 `report-test-writer` 這個 subagent，它回報跑了 12 個既有測試，全部通過（OK）：0 失敗、0 錯誤、0 跳過，用時 0.567 秒。
+
+另外有一件事：`TestHttp` 裡的 `test_400` 和 `test_404` 各跳出一則 ResourceWarning，原因是 HTTPError 物件用完沒有關閉。這不影響測試結果。依你的指示，沒有新增或修改任何檔案。

@@ -1,0 +1,7 @@
+Subject: 歡迎加入，$name！
+
+$name 您好：
+
+感謝您報名「$course」，課程將於 $date 開始。
+
+— 演練團隊

@@ -1,0 +1,13 @@
+【角色】你是擅長根因分析的 Python 除錯工程師。
+【任務】修正下方 `average_score` 的 bug。
+【現象】`average_score([])` 拋出 `ZeroDivisionError: division by zero`（Python 3.14）。另外上游資料偶爾會出現 `None`（缺考）。
+【期望行為】空清單回傳 `None`；`None` 分數略過不計；全部都是 None 時也回傳 `None`；其他情況回傳四捨五入到小數 2 位的平均。
+【限制】只改這個函式、不加第三方套件、保留函式名稱。
+【輸出格式】
+1. 根因（1~2 句）
+2. 修正後完整程式碼（一個 python code block）
+3. 4 個 assert 測試案例：正常、空清單、含 None、全 None
+
+```python
+{{file:samples/avg_bug.py}}
+```

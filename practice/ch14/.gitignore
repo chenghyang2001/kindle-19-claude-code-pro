@@ -1,0 +1,8 @@
+CLAUDE.local.md
+.claude/settings.local.json
+__pycache__/
+*.pyc
+*.db
+out/
+*.stackdump
+.env

@@ -1,0 +1,145 @@
+Run started:2026-10-18 01:29:33.437342+00:00
+
+Test results:
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: ch15-sample/fixed\app.py:18:0
+17	import re
+18	import subprocess
+19	from ast import literal_eval
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: ch15-sample/fixed\app.py:96:11
+95	        raise ValueError(f"非法主機名：{host!r}")
+96	    return subprocess.check_output(
+97	        ["ping", "-n", "1", host], shell=False, text=True, errors="replace"
+98	    )
+99	
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: ch15-sample/fixed\app.py:97:11
+96	    return subprocess.check_output(
+97	        ["ping", "-n", "1", host], shell=False, text=True, errors="replace"
+98	    )
+99	
+100	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:26:4
+25	def test_login_success(conn):
+26	    assert app.login(conn, "alice", "alice-pw") is not None
+27	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:30:4
+29	def test_login_wrong_password(conn):
+30	    assert app.login(conn, "alice", "wrong") is None
+31	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:34:4
+33	def test_get_user_returns_row(conn):
+34	    assert app.get_user(conn, 1) == [(1, "alice", "admin")]
+35	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:39:4
+38	    # 同一密碼兩次雜湊結果不同（salt 生效）
+39	    assert app.hash_password("x") != app.hash_password("x")
+40	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:43:4
+42	def test_calc_literal(conn):
+43	    assert app.calc("[1, 2, 3]") == [1, 2, 3]
+44	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:48:4
+47	    app.delete_user(conn, "admin", 2)
+48	    assert app.get_user(conn, 2) == []
+49	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:55:4
+54	    # vulnerable 版此 payload 可繞過密碼；修復版應登入失敗
+55	    assert app.login(conn, "alice' --", "wrong") is None
+56	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:77:4
+76	    blob = app.dump_session({"uid": 1})
+77	    assert app.load_session(blob) == {"uid": 1}
+78	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: ch15-sample/fixed\test_app.py:84:4
+83	    # 使用者仍在，刪除確實被擋
+84	    assert app.get_user(conn, 1) == [(1, "alice", "admin")]
+85	
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 141
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 12
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 0
+		High: 12
+Files skipped (0):

@@ -1,0 +1,11 @@
+【角色】你是 Python 後端工程師，熟悉 FastAPI 與 REST 設計。
+【任務】為「使用者管理系統」設計 RESTful API：列出使用者（分頁）、取得單一使用者、建立、更新、刪除。
+【限制】
+- 框架 FastAPI + Pydantic v2；先用記憶體 dict 當儲存層（不接資料庫）
+- 所有端點需 JWT Bearer 認證（用 Depends 抽出驗證函式，密鑰從環境變數 JWT_SECRET 讀取，不可寫死）
+- 錯誤回應遵循 RFC 7807（application/problem+json，含 type/title/status/detail）
+- 程式碼控制在 120 行內
+【輸出格式】
+1. 端點一覽表（Method / Path / 說明 / 成功狀態碼）
+2. 單一 main.py 完整程式碼
+3. 3 行以內的啟動與測試指令

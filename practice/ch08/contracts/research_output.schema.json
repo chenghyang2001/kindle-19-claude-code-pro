@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/research_output.schema.json",
+  "title": "ResearchOutput",
+  "description": "研究 agent → 寫作 agent 的資料合約（生產者端，嚴格版）。status 決定其餘欄位的規則。",
+  "type": "object",
+  "required": ["contract_version", "status", "topic", "generated_at"],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$",
+      "description": "主版號 1 才相容；小版號只能新增選填欄位"
+    },
+    "status": {
+      "enum": ["ok", "empty", "error"],
+      "description": "ok=有發現；empty=查無資料；error=研究失敗"
+    },
+    "topic": { "type": "string", "minLength": 3, "maxLength": 200 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "findings": {
+      "type": "array",
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "summary": { "type": "string", "maxLength": 1000 },
+    "error": { "$ref": "#/$defs/error" },
+    "attempts": { "type": "integer", "minimum": 1, "maximum": 5 }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "ok" } } },
+      "then": {
+        "required": ["findings"],
+        "properties": { "findings": { "minItems": 1 } }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "empty" } } },
+      "then": { "properties": { "findings": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "error" } } },
+      "then": { "required": ["error"] }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["title", "key_points", "sources", "confidence"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "key_points": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["url"],
+            "properties": {
+              "url": { "type": "string", "pattern": "^https?://" },
+              "title": { "type": "string" },
+              "published": { "type": "string", "format": "date" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": { "enum": ["NETWORK", "TIMEOUT", "RATE_LIMIT", "INTERNAL"] },
+        "message": { "type": "string" },
+        "retryable": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

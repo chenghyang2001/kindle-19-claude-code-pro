@@ -1,0 +1,36 @@
+請把下面的程式碼解釋給「不寫程式的產品經理」聽。
+他們最想知道：折扣怎麼算、金額會不會算錯
+
+規則：
+1. 用對方熟悉的詞彙；出現專有名詞時用一句話白話解釋。
+2. 先講「這段在做什麼」，再講「怎麼做」，最後講「要注意什麼」。
+3. 至少舉一個具體數字的例子走一遍流程。
+4. 長度：250 字以內。
+
+程式碼：
+```
+"""示範用的訂單工具函式（刻意留有幾個問題，給審查/除錯/重構模板當素材）"""
+
+
+def calc_total(items, discount=0):
+    total = 0
+    for i in items:
+        total = total + i["price"] * i["qty"]
+    if discount > 0:
+        total = total - total * discount / 100
+    return round(total, 2)
+
+
+def average_price(items):
+    # 空清單時會 ZeroDivisionError（故意保留，給除錯模板用）
+    return sum(i["price"] for i in items) / len(items)
+
+
+if __name__ == "__main__":
+    demo = [{"price": 100, "qty": 2}, {"price": 50, "qty": 1}]
+    print("total =", calc_total(demo, discount=10))
+    print("avg   =", average_price(demo))
+
+```
+
+輸出格式：三個小標題「做什麼 / 怎麼做（含例子）/ 注意事項」。

@@ -1,0 +1,27 @@
+[風險1] 幻覺 API 檢查
+  hashlib.secureHash             存在? False
+  hashlib.pbkdf2_hmac            存在? True
+  secrets.token_urlsafe          存在? True
+  secrets.secure_random_string   存在? False
+  套件 requests_secure_auth   可匯入? False
+  套件 json                   可匯入? True
+  -> 不存在的名稱若被開發者「自己補一個」或被搶註成惡意套件（slopsquatting），就成了漏洞
+
+[風險2] 過時安全建議：MD5 vs PBKDF2（200k 輪）
+  單核 MD5 每秒 724,478 次；PBKDF2 每秒 5.2 次；差 140,603 倍
+  -> 依舊建議寫的雜湊，離線暴力破解成本極低
+
+[風險3] 過度通用：在 win32 執行 Linux 慣用的 `ping -c 1 127.0.0.1`
+  exit code = 1（Windows 的 ping 沒有 -c 選項，含意不同）
+  AI 常寫死 /tmp；本機暫存目錄是 /tmp 嗎? False（Windows 為 %TEMP%）
+  -> 錯誤路徑/權限/選項，可能讓暫存檔落到他人可讀位置，或讓驗證邏輯靜默失效
+
+[風險4] 缺少業務邏輯驗證
+  qty=-3            -> 總價 -3000（變成退款）
+  coupon_pct=150    -> 總價 -500（倒貼）
+  -> 只有你知道「數量 1~99、折扣上限 30%、一人一張券」這些規則
+
+[風險5] 過度信任 AI 輸出：random 產生的 token 可被預測
+  受害者 token f70ef9a1c30c5992 / 攻擊者重算 f70ef9a1c30c5992 / 相同 True
+  正確作法 secrets.token_hex(8) -> f8dce53aa27d9ff7
+

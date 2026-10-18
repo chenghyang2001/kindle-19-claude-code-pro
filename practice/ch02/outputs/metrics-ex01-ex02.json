@@ -1,0 +1,90 @@
+[
+  {
+    "name": "ex01/p1-after",
+    "status": "ok",
+    "seconds": 72.5,
+    "chars": 2823,
+    "lines": 94,
+    "code_blocks": 2,
+    "table_rows": 0,
+    "asserts": 8,
+    "asks_back": false
+  },
+  {
+    "name": "ex01/p1-before",
+    "status": "ok",
+    "seconds": 61.8,
+    "chars": 2074,
+    "lines": 68,
+    "code_blocks": 1,
+    "table_rows": 0,
+    "asserts": 1,
+    "asks_back": false
+  },
+  {
+    "name": "ex01/p2-after",
+    "status": "ok",
+    "seconds": 58.9,
+    "chars": 1058,
+    "lines": 41,
+    "code_blocks": 2,
+    "table_rows": 0,
+    "asserts": 5,
+    "asks_back": false
+  },
+  {
+    "name": "ex01/p2-before",
+    "status": "ok",
+    "seconds": 59.0,
+    "chars": 2087,
+    "lines": 70,
+    "code_blocks": 1,
+    "table_rows": 5,
+    "asserts": 6,
+    "asks_back": false
+  },
+  {
+    "name": "ex01/p3-after",
+    "status": "ok",
+    "seconds": 84.5,
+    "chars": 5924,
+    "lines": 171,
+    "code_blocks": 2,
+    "table_rows": 7,
+    "asserts": 0,
+    "asks_back": false
+  },
+  {
+    "name": "ex01/p3-before",
+    "status": "ok",
+    "seconds": 47.3,
+    "chars": 764,
+    "lines": 31,
+    "code_blocks": 0,
+    "table_rows": 0,
+    "asserts": 0,
+    "asks_back": false
+  },
+  {
+    "name": "ex02/b-norole",
+    "status": "ok",
+    "seconds": 69.8,
+    "chars": 4120,
+    "lines": 139,
+    "code_blocks": 5,
+    "table_rows": 0,
+    "asserts": 0,
+    "asks_back": false
+  },
+  {
+    "name": "ex02/b-role",
+    "status": "ok",
+    "seconds": 87.2,
+    "chars": 6980,
+    "lines": 183,
+    "code_blocks": 1,
+    "table_rows": 15,
+    "asserts": 0,
+    "asks_back": false
+  }
+]

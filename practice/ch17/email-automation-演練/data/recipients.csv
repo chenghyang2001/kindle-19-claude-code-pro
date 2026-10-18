@@ -1,0 +1,5 @@
+email,name,course,date
+alice@example.com,Alice,Claude Code 入門,2026-11-01
+bob@example.com,Bob,Claude Code 入門,2026-11-01
+not-an-email,Carol,Claude Code 入門,2026-11-01
+ALICE@example.com,Alice2,Claude Code 入門,2026-11-01

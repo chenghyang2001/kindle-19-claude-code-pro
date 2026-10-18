@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/writer_input.schema.json",
+  "title": "WriterInput",
+  "description": "寫作 agent 的輸入期望（消費者端，寬鬆版 / Tolerant Reader）。只鎖寫作真正會用到的欄位，允許多餘欄位，降低與研究 agent 的耦合。",
+  "type": "object",
+  "required": ["topic", "findings"],
+  "properties": {
+    "topic": { "type": "string", "minLength": 1 },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["title", "key_points"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "key_points": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" }
+          },
+          "sources": { "type": "array" },
+          "confidence": { "type": "number", "default": 0.5 }
+        }
+      }
+    }
+  }
+}

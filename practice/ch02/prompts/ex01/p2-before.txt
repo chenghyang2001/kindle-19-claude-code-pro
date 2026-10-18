@@ -1,0 +1,5 @@
+這個 bug 怎麼修
+
+```python
+{{file:samples/avg_bug.py}}
+```

@@ -1,0 +1,58 @@
+# 範本：部署 Next.js 到 Vercel（本練習未實際執行，需 Vercel 帳號與 GitHub Secrets）
+# 需要的 GitHub Secrets（名稱）：VERCEL_TOKEN、VERCEL_ORG_ID、VERCEL_PROJECT_ID
+name: Deploy
+
+on:
+  push:
+    branches: [main]        # main → 先部署 staging
+  workflow_dispatch:        # 手動觸發 → 推上 production
+    inputs:
+      target:
+        description: "部署目標"
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # GitHub Environment：production 可設「需人工核准」保護規則
+    environment: ${{ github.event.inputs.target || 'staging' }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 安裝 Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: 拉取對應環境的變數
+        run: |
+          if [ "${{ github.event.inputs.target }}" = "production" ]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=preview --git-branch=staging --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+      - name: 建置
+        run: |
+          if [ "${{ github.event.inputs.target }}" = "production" ]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+      - name: 部署
+        run: |
+          if [ "${{ github.event.inputs.target }}" = "production" ]; then
+            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+          fi

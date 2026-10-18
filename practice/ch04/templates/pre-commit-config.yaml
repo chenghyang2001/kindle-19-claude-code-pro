@@ -1,0 +1,17 @@
+# 範本：複製為專案根目錄的 .pre-commit-config.yaml，再執行 `pre-commit install`
+# （需要 `python -m pip install pre-commit`，本練習未實際安裝）
+repos:
+  - repo: local
+    hooks:
+      - id: quality-gate
+        name: 品質閘門（SQL 組合 / 硬編碼機密 / 裸 except）
+        entry: python tools/quality_gate.py
+        language: system
+        types: [python]
+        # 刻意保留缺陷的示範檔不掃
+        exclude: ^(starter/|src/legacy_fetch_user\.py)
+      - id: pytest
+        name: pytest
+        entry: python -m pytest -q
+        language: system
+        pass_filenames: false

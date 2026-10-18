@@ -1,0 +1,13 @@
+Denying Bash also turns off the PowerShell tool, so Claude has neither. To use PowerShell, set CLAUDE_CODE_USE_POWERSHELL_TOOL=1.
+**不可以。**
+
+原因：
+
+1. **這是專案的第一條規則。** `CLAUDE.md` 列出「最重要的三件事」，第 1 條就是「預設 dry-run，真的寄信只能透過 `--send` 旗標」。規則有衝突時，它排在最前面。
+2. **這是明文禁止的改法。** `docs/rules.md:17` 把「移除或繞過 dry-run 預設（例如把 `--send` 改成預設開啟）」列為禁止事項。這次的提議正是文件舉的例子。
+3. **信寄出去就收不回來。** 專案的優先順序是「安全 > 正確性 > 速度」。如果預設就真的寄信，只要忘了加 `--dry-run`、參數打錯，或複製了別人的指令，信就會直接寄給 CSV 上的真實收件人。現在的設計是：最壞情況只是「該寄的沒寄」，重跑一次就好；改了以後，最壞情況是「不該寄的已經寄出」，沒有辦法補救。
+4. **連帶影響很多地方。** `sender.send_all(dry_run=...)` 的預設值、`docs/commands.md` 的指令表、`tests/test_core.py` 中以 dry-run 為前提的端到端測試，都必須一起改。改完後，舊指令的行為會悄悄變成真的寄信。
+
+如果嫌真的寄信時要多打字，比較安全的改法是：維持預設 dry-run，在 `--send` 寄出前再加一道確認，例如顯示收件人數並要求輸入 `yes`。不建議把預設反過來。
+
+依照指示，我沒有修改任何檔案。
