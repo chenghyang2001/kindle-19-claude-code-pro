@@ -21,3 +21,4 @@
 | 11 | 2026-10-18 | 7 分 | create-next-app 建 landing/，Hero＋Pricing，npm run build＋eslint 通過、next start curl 200、三寬度截圖；只做兩元件；npm 5 個 high 漏洞未處理；不部署 |
 | 12 | 2026-10-18 | 6 分 | 自建 legacy 信件簡報 pipeline 當現有系統，再加失敗點分析與重要度評分，15 passed；外部服務全本地模擬、摘要用規則；題目原只要偽程式碼 |
 | 13 | 2026-10-18 | 14 分 | Neon 改本機 SQLite（另留 PG schema 範本）、NextAuth 改自簽 JWT；5 端點全做，vitest 24/24、tsc、build 通過、curl 冒煙；中途 vitest 報錯後停下，教練送「繼續」才完成 |
+| 14 | 2026-10-18 | 9 分 | 模組化 CLAUDE.md（@ 匯入 docs/）＋settings 分層＋5 個專案 agents，訂單報表 12 unittest 通過、claude -p 驗證匯入；前端用原生 HTML 非 React；只實派 1 個 agent |
