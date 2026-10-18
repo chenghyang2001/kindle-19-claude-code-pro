@@ -23,3 +23,4 @@
 | 13 | 2026-10-18 | 14 分 | Neon 改本機 SQLite（另留 PG schema 範本）、NextAuth 改自簽 JWT；5 端點全做，vitest 24/24、tsc、build 通過、curl 冒煙；中途 vitest 報錯後停下，教練送「繼續」才完成 |
 | 14 | 2026-10-18 | 9 分 | 模組化 CLAUDE.md（@ 匯入 docs/）＋settings 分層＋5 個專案 agents，訂單報表 12 unittest 通過、claude -p 驗證匯入；前端用原生 HTML 非 React；只實派 1 個 agent |
 | 15 | 2026-10-18 | 7 分 | 漏洞版＋修復版（Python，題目片段為 Node.js），bandit 12→3 且 HIGH 歸零、pytest 13 passed；ex02 CI YAML 只文字設計未產檔 |
+| 16 | 2026-10-18 | 5 分 | 專案 prompts/ 8 模板＋索引＋填變數工具，21 passed、claude -p 實跑 1 模板；題目要 ~/.claude/prompts/ 改專案層；slash command 未寫入全域 |
