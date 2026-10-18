@@ -16,3 +16,4 @@
 | 06 | 2026-10-18 | 7 分 | 三層測試＋claude -p 實際生成測試，共 56 passed；無 starter 自建 alert_level.py；ex01 8 個測試（題目 6）；多做突變測試量化品質 |
 | 07 | 2026-10-18 | 3 分 | 先建 12 個特性化測試再 Rename→Extract，12→13→16 全綠、每步獨立 commit；找 14 個異味（題目 5）；刻意保留怪行為不修 |
 | 08 | 2026-10-18 | 7 分 | 合約寫成 JSON Schema 2020-12 並驗證合格／不合格樣本（抓 6 違規）、DAG 時間模擬、mock 協作 6 情境，12 passed；題目原只要文字與簡化 schema |
+| 09 | 2026-10-18 | 6 分 | 能力地圖用 claude mcp list（17 server）；gh api GET 與 GitHub MCP 對照（repo 0 issue）；Notion 只用 --scope project 寫 .mcp.json 範本；Gmail 唯讀實查；使用者層 MCP 未變 |
